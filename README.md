@@ -4,8 +4,8 @@ An interactive, source-backed museum of the path toward artificial general intel
 
 ## Experience
 
-- Five chronological galleries with 51 sourced exhibits.
-- Dedicated `/timeline` page: all 51 entries in a continuous vertical column, complete context and sources, sticky chapter navigation, scroll reveals and reading progress.
+- Five chronological galleries with 68 sourced exhibits.
+- Dedicated `/timeline` page: all 68 entries in a continuous vertical column, complete context and sources, sticky chapter navigation, scroll reveals and reading progress.
 - Homepage “Expand the timeline” link with original ImageGen artwork.
 - Search across the whole archive and filter by technology, ideas, institutions, or governance.
 - Animated exhibit transitions, horizontal galleries, guided playback, timeline scrubber, and previous/next navigation.
@@ -36,7 +36,7 @@ Some infrastructure files from the Sites starter are retained for compatibility;
 
 Edit `data/events.ts`. Dates may identify a year or month rather than a specific day. Each event distinguishes historical events, research findings, forecasts/philosophy, and company claims. Original-source links travel with the event. The collection is a selection of consequential milestones, not an exhaustive catalog of all AI research. AGI-era rhetoric is not presented as universal scientific consensus. Live sources can change after the collection cutoff.
 
-The dataset preserves the complete 51-entry researched timeline, including its September 9 concluding exhibit. No analytics, credentials, personal information, or tracking are embedded.
+The dataset preserves the original 51-entry researched timeline plus 17 science and mathematics exhibits, including its September 9 concluding exhibit. No analytics, credentials, personal information, or tracking are embedded.
 
 ## Image credit
 
@@ -54,3 +54,5 @@ Source repository: https://github.com/ya-nsh/agi-museum
 `public/intelligence-gallery.png` was created using built-in ImageGen as conceptual contemporary museum artwork, not an archival photograph. It appears on the homepage expansion banner and the `/timeline` hero.
 
 Prompt: A luminous pale chartreuse filament crossing a dark architectural gallery, transitioning from tactile ivory punched paper and glass vacuum tubes on the left into an elegant suspended crystalline neural sculpture on the right. Premium contemporary museum installation photograph, cinematic still life; landscape 1536×1024; charcoal black #131411, restrained chartreuse #d5f68b, ivory and silver; dramatic volumetric light; no text, logos, UI or watermark.
+
+Science expansion: primary-source entries cover algorithm discovery, geometry and formal proofs, molecular and genomic prediction, weather, materials, and research agents. The September 8, 2026 Navier–Stokes and Euler announcements are labeled company claims with their scope and verification limits. Existing accession IDs are preserved; both views share the chronologically sorted dataset.
