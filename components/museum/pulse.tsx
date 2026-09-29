@@ -22,7 +22,7 @@ export function Pulse({ onOpen }: { onOpen: (e: Event) => void }) {
   const peak = [...byYear.entries()].sort((a, b) => b[1].length - a[1].length)[0];
 
   return (
-    <section className="pulse shell" aria-labelledby="pulse-title">
+    <section id="archive" className="pulse shell" aria-labelledby="pulse-title">
       <div className="section-head">
         <div>
           <Eyebrow index="03">THE SHAPE OF THE ARCHIVE</Eyebrow>

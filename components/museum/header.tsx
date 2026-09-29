@@ -6,6 +6,7 @@ import { AnimatePresence, motion, useMotionValueEvent, useScroll } from 'motion/
 import { Search, X } from 'lucide-react';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { useMuseum } from './providers';
+import { useActiveSection } from './use-active-section';
 
 const LINKS = [
   { href: '/#galleries', label: 'Galleries' },
@@ -38,6 +39,11 @@ export function Header({ onSearch, current }: { onSearch: () => void; current?: 
   const mac = useSyncExternalStore(() => () => {}, () => /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent), () => true);
   const home = usePathname() === '/';
   const href = (h: string) => (home && h.startsWith('/#') ? h.slice(1) : h);
+  const spied = useActiveSection(home ? LINKS.filter(l => l.href.startsWith('/#')).map(l => l.href.slice(2)) : []);
+  const isCurrent = (l: { href: string; label: string }) => current === l.label || (!!spied && l.href === `/#${spied}`);
+
+  // Let sticky toolbars know whether the header is covering the top of the viewport.
+  useEffect(() => { document.documentElement.dataset.header = hidden && !menu ? 'hidden' : 'shown'; }, [hidden, menu]);
 
   useEffect(() => { if (!menu) return; lockScroll(true); return () => lockScroll(false); }, [menu, lockScroll]);
 
@@ -53,7 +59,7 @@ export function Header({ onSearch, current }: { onSearch: () => void; current?: 
         <Link href="/" className="brand" aria-label="AGI Museum home"><Wordmark /></Link>
         <nav className="main-nav" aria-label="Main navigation">
           {LINKS.map(l => (
-            <NavLink key={l.href} href={href(l.href)} className={current === l.label ? 'current' : ''} aria-current={current === l.label ? 'page' : undefined}>
+            <NavLink key={l.href} href={href(l.href)} className={isCurrent(l) ? 'current' : ''} aria-current={current === l.label ? 'page' : isCurrent(l) ? 'location' : undefined}>
               <span data-text={l.label}>{l.label}</span>
             </NavLink>
           ))}

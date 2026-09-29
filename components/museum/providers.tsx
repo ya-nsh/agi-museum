@@ -1,7 +1,7 @@
 'use client';
 
 import Lenis from 'lenis';
-import { MotionConfig } from 'motion/react';
+import { AnimatePresence, MotionConfig, motion } from 'motion/react';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 
 type Ctx = {
@@ -14,6 +14,8 @@ type Ctx = {
   lockScroll: (locked: boolean) => void;
   introDone: boolean;
   finishIntro: () => void;
+  /** Show a short confirmation message at the bottom of the screen. */
+  toast: (message: string) => void;
 };
 
 const MuseumCtx = createContext<Ctx | null>(null);
@@ -103,12 +105,29 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   const finishIntro = useCallback(() => setIntroFinished(true), []);
 
-  const value = useMemo(() => ({ reduced, toggleMotion, scrollTo, lockScroll, introDone, finishIntro }), [reduced, toggleMotion, scrollTo, lockScroll, introDone, finishIntro]);
+  const [toasts, setToasts] = useState<{ id: number; message: string }[]>([]);
+  const toastId = useRef(0);
+  const toast = useCallback((message: string) => {
+    const id = ++toastId.current;
+    setToasts(t => [...t.slice(-2), { id, message }]);
+    setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 2400);
+  }, []);
+
+  const value = useMemo(() => ({ reduced, toggleMotion, scrollTo, lockScroll, introDone, finishIntro, toast }), [reduced, toggleMotion, scrollTo, lockScroll, introDone, finishIntro, toast]);
 
   return (
     <MuseumCtx.Provider value={value}>
       <MotionConfig reducedMotion={reduced ? 'always' : 'never'} transition={{ ease: [0.22, 1, 0.36, 1] }}>
         {children}
+        <div className="toasts" role="status" aria-live="polite">
+          <AnimatePresence>
+            {toasts.map(t => (
+              <motion.div key={t.id} className="toast" layout initial={{ opacity: 0, y: 24, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: 0.95 }} transition={{ type: 'spring', stiffness: 420, damping: 30 }}>
+                <span className="toast-dot" />{t.message}
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
       </MotionConfig>
     </MuseumCtx.Provider>
   );

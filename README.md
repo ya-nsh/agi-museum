@@ -14,6 +14,8 @@ An interactive, source-backed museum of the path toward artificial general intel
 - **The reading room:** evidence labels, glossary and curators’ note.
 - **`/timeline`:** the complete chronology on a paper-toned reading layout with a scroll-drawn spine, chapter progress and thread highlighting.
 - **⌘K / Ctrl+K or `/`** searches the entire collection from any page.
+- **Guided tour** in the exhibit dialog (button or Space) autoplays through the chronology; swipe left/right on touch screens; “Surprise me” jumps to a random exhibit.
+- **Wayfinding:** scroll-spy header and section index, a sticky filter bar with a plain-language summary, a back-to-top ring, a “now reading” year counter on the timeline, and a curtain transition between pages.
 - Smooth scrolling, a custom cursor and a one-per-session intro. The header’s motion switch and the OS reduced-motion setting turn all of it off.
 
 port, and reduced-motion preferences.
@@ -33,7 +35,7 @@ npm run dev
 npm run build
 ```
 
-This is a **Next.js 16 App Router** application with React 19 and TypeScript. Motion powers the animations, Lenis the smooth scrolling, Radix the accessible dialogs, and Lucide the icons. Type is set in Bodoni Moda, Schibsted Grotesk and Martian Mono. The native Next.js build produces a static export in `out/`. Deploy that directory to a static host, or import the repository into a Next.js-compatible host. No API keys or runtime backend are required.
+This is a **Next.js 16 App Router** application with React 19 and TypeScript. Motion powers the animations, Lenis the smooth scrolling, Radix the accessible dialogs, and Lucide the icons. Type is set in Newsreader (display), Schibsted Grotesk (text) and IBM Plex Mono (labels). The native Next.js build produces a static export in `out/`. Deploy that directory to a static host, or import the repository into a Next.js-compatible host. No API keys or runtime backend are required.
 
 Some infrastructure files from the Sites starter are retained for compatibility; the application build uses native `next build --webpack`, not Vinext. `npm start` serves the built static export locally on port 3000 (or the `PORT` environment variable).
 

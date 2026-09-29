@@ -77,6 +77,15 @@ export function Collection({ era, setEra, onOpen }: { era: number | null; setEra
         </div>
       </div>
 
+      <p className="filter-summary" aria-live="polite">
+        Showing <b>{filtered.length}</b> {filtered.length === 1 ? 'exhibit' : 'exhibits'}
+        {track && <> on the <b className={`t-${track.toLowerCase()} tint`}>{track}</b> thread</>}
+        {status && <> labeled <b>{status.toLowerCase()}</b></>}
+        {era !== null && <> in <b>Gallery {eras[era].numeral}: {eras[era].title}</b></>}
+        {query.trim() && <> matching <b>“{query.trim()}”</b></>}
+        {newest ? ', newest first.' : ', oldest first.'}
+      </p>
+
       {shown.length ? (
         <motion.ul className={`exhibits ${view}`} layout>
           <AnimatePresence mode="popLayout">

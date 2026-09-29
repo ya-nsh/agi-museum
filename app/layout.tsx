@@ -1,13 +1,15 @@
 import type { Metadata, Viewport } from 'next';
-import { Bodoni_Moda, Martian_Mono, Schibsted_Grotesk } from 'next/font/google';
+import Script from 'next/script';
+import { IBM_Plex_Mono, Newsreader, Schibsted_Grotesk } from 'next/font/google';
 import { Providers } from '@/components/museum/providers';
 import { Cursor } from '@/components/museum/cursor';
+import { ScrollTop } from '@/components/museum/section-nav';
 import { events } from '@/data/events';
 import './globals.css';
 
-const serif = Bodoni_Moda({ subsets: ['latin'], style: ['normal', 'italic'], axes: ['opsz'], variable: '--font-serif', display: 'swap' });
+const serif = Newsreader({ subsets: ['latin'], style: ['normal', 'italic'], axes: ['opsz'], variable: '--font-serif', display: 'swap' });
 const sans = Schibsted_Grotesk({ subsets: ['latin'], variable: '--font-sans', display: 'swap' });
-const mono = Martian_Mono({ subsets: ['latin'], variable: '--font-mono', display: 'swap', weight: ['300', '400', '500'] });
+const mono = IBM_Plex_Mono({ subsets: ['latin'], variable: '--font-mono', display: 'swap', weight: ['400', '500'] });
 
 const description = `An interactive, source-backed museum of the road to artificial general intelligence: ${events.length} exhibits from 1943 to September 2026, spanning breakthroughs, ideas, institutions and governance.`;
 
@@ -29,12 +31,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${serif.variable} ${sans.variable} ${mono.variable}`} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: introScript }} />
+        <Script id="intro-state" strategy="beforeInteractive">{introScript}</Script>
         <noscript><style>{'.preloader{display:none}.line-inner{transform:none!important}'}</style></noscript>
       </head>
       <body>
         <Providers>
           {children}
+          <ScrollTop />
           <Cursor />
         </Providers>
         <div className="grain" aria-hidden="true" />

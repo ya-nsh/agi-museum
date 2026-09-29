@@ -12,6 +12,7 @@ import { Footer } from '@/components/museum/closing';
 import { RevealLines } from '@/components/museum/reveal';
 import { Sigil } from '@/components/museum/sigil';
 import { useMuseum } from '@/components/museum/providers';
+import { Odometer } from '@/components/museum/odometer';
 
 export default function Timeline() {
   const { scrollTo } = useMuseum();
@@ -20,6 +21,7 @@ export default function Timeline() {
   const [chapter, setChapter] = useState(0);
   const [chapterProgress, setChapterProgress] = useState<number[]>(() => eras.map(() => 0));
   const [flash, setFlash] = useState<string | null>(null);
+  const [reading, setReading] = useState<Event>(events[0]);
   const hero = useRef<HTMLElement>(null);
   const column = useRef<HTMLDivElement>(null);
 
@@ -51,6 +53,17 @@ export default function Timeline() {
     addEventListener('scroll', schedule, { passive: true });
     addEventListener('resize', schedule);
     return () => { cancelAnimationFrame(raf); removeEventListener('scroll', schedule); removeEventListener('resize', schedule); };
+  }, []);
+
+  // The exhibit crossing the middle of the screen drives the "now reading" counter.
+  useEffect(() => {
+    const io = new IntersectionObserver(entries => {
+      const hit = entries.find(en => en.isIntersecting);
+      const e = hit && events.find(x => x.id === hit.target.id);
+      if (e) setReading(e);
+    }, { rootMargin: '-45% 0px -54% 0px' });
+    document.querySelectorAll('.tl-event').forEach(el => io.observe(el));
+    return () => io.disconnect();
   }, []);
 
   const jump = (e: Event) => {
@@ -94,6 +107,7 @@ export default function Timeline() {
                   </button>
                 ))}
               </div>
+              <div className="tl-now-compact mono" aria-hidden="true"><Odometer value={reading.year} /><span>{reading.title}</span></div>
               <div className="tl-meta mono"><span>{events.length} EXHIBITS · {sourceCount} SOURCES</span><span className="tl-pct">READ <motion.b>{pct}</motion.b></span></div>
             </div>
             <motion.i className="tl-bar-progress" style={{ scaleX: scrollYProgress }} />
@@ -111,6 +125,12 @@ export default function Timeline() {
                   </a>
                 ))}
               </nav>
+              <div className={`tl-now t-${reading.track.toLowerCase()}`} aria-live="off">
+                <p className="mono">NOW READING · NO. {accession(reading)}</p>
+                <Odometer value={reading.year} className="tl-now-year serif" />
+                <a href={`#${reading.id}`} className="tl-now-title">{reading.title}</a>
+                <span className="mono tl-now-track"><i className="dot" />{reading.track.toUpperCase()}</span>
+              </div>
               <div className="tl-rail-note">
                 <p className="mono">EVERY EXHIBIT IS LABELED</p>
                 <p>History, research, perspectives and company claims each carry their own label. Press <kbd>/</kbd> to search.</p>

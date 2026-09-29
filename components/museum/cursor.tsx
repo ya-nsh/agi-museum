@@ -21,6 +21,26 @@ export function Cursor() {
     return () => fine.removeEventListener('change', sync);
   }, [reduced]);
 
+  // Magnetic buttons: primary actions lean toward the pointer.
+  useEffect(() => {
+    if (!enabled) return;
+    let current: HTMLElement | null = null;
+    const release = () => { if (current) { current.style.removeProperty('--mx-t'); current.style.removeProperty('--my-t'); current = null; } };
+    const move = (e: PointerEvent) => {
+      const el = (e.target as HTMLElement | null)?.closest?.<HTMLElement>('.btn, .magnetic');
+      if (el !== current) release();
+      if (!el) return;
+      current = el;
+      const r = el.getBoundingClientRect();
+      const dx = (e.clientX - (r.left + r.width / 2)) / r.width, dy = (e.clientY - (r.top + r.height / 2)) / r.height;
+      el.style.setProperty('--mx-t', `${dx * 10}px`);
+      el.style.setProperty('--my-t', `${dy * 8}px`);
+    };
+    addEventListener('pointermove', move, { passive: true });
+    document.documentElement.addEventListener('pointerleave', release);
+    return () => { release(); removeEventListener('pointermove', move); document.documentElement.removeEventListener('pointerleave', release); };
+  }, [enabled]);
+
   useEffect(() => {
     document.documentElement.classList.toggle('has-cursor', enabled);
     if (!enabled) return;

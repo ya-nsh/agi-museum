@@ -14,6 +14,7 @@ import { Hero, Manifesto } from '@/components/museum/hero';
 import { Marquee } from '@/components/museum/marquee';
 import { Preloader } from '@/components/museum/preloader';
 import { Pulse } from '@/components/museum/pulse';
+import { SectionNav } from '@/components/museum/section-nav';
 import { useMuseum } from '@/components/museum/providers';
 
 export default function Museum() {
@@ -47,7 +48,7 @@ export default function Museum() {
       <a className="skip-link" href="#collection">Skip to the collection</a>
       <Header onSearch={() => setPalette(true)} />
       <main>
-        <Hero />
+        <Hero onOpen={open} />
         <Marquee onOpen={openId} />
         <Manifesto />
         <Galleries onEnter={enterGallery} onOpen={open} />
@@ -59,6 +60,7 @@ export default function Museum() {
         <Closing />
       </main>
       <Footer />
+      <SectionNav />
       <ExhibitDialog event={selected} onClose={close} onNavigate={open} />
       <CommandPalette open={palette} onOpenChange={setPalette} onSelect={open} />
     </>

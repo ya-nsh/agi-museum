@@ -2,14 +2,15 @@
 
 import Link from 'next/link';
 import { motion, useScroll, useTransform } from 'motion/react';
-import { ArrowDown, ArrowUpRight } from 'lucide-react';
-import { useRef } from 'react';
-import { eras, events, firstYear, lastYear, sourceCount } from '@/lib/museum';
+import { AnimatePresence } from 'motion/react';
+import { ArrowDown, ArrowUpRight, Shuffle } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { eras, events, firstYear, formatDate, lastYear, sourceCount, type Event } from '@/lib/museum';
 import { NeuralField } from './neural-field';
 import { CountUp, RevealLines } from './reveal';
 import { useMuseum } from './providers';
 
-export function Hero() {
+export function Hero({ onOpen }: { onOpen: (e: Event) => void }) {
   const { introDone } = useMuseum();
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
@@ -31,6 +32,7 @@ export function Hero() {
         <motion.div className="hero-ctas" {...up(0.8)}>
           <a className="btn btn-primary" href="#collection" data-cursor="Enter"><span>Enter the collection</span><ArrowDown size={16} /></a>
           <Link className="btn btn-ghost" href="/timeline"><span>Walk the full timeline</span><ArrowUpRight size={16} /></Link>
+          <button className="btn btn-text" onClick={() => onOpen(events[Math.floor(Math.random() * events.length)])}><Shuffle size={16} /><span>Surprise me</span></button>
         </motion.div>
       </motion.div>
       <motion.dl className="hero-stats shell" {...up(1)}>
@@ -38,12 +40,47 @@ export function Hero() {
         <div><dt className="mono">Years</dt><dd className="serif"><CountUp to={lastYear - firstYear} play={introDone} /></dd></div>
         <div><dt className="mono">Galleries</dt><dd className="serif"><CountUp to={eras.length} pad={2} play={introDone} /></dd></div>
         <div><dt className="mono">Primary sources</dt><dd className="serif"><CountUp to={sourceCount} play={introDone} /></dd></div>
-        <div className="fig-caption mono">FIG. 01 — AN 80-COLUMN PUNCH CARD FOLDS INTO A NEURAL SPHERE. MOVE YOUR CURSOR THROUGH IT.</div>
+        <Acquisitions onOpen={onOpen} play={introDone} />
       </motion.dl>
+      <motion.p className="fig-caption mono" initial={{ opacity: 0 }} animate={introDone ? { opacity: 1 } : undefined} transition={{ delay: 2.4, duration: 1 }}>
+        FIG. 01 — AN 80-COLUMN PUNCH CARD FOLDS INTO A NEURAL SPHERE. MOVE YOUR CURSOR THROUGH IT.
+      </motion.p>
       <motion.div className="scroll-cue mono" initial={{ opacity: 0 }} animate={introDone ? { opacity: 1 } : undefined} transition={{ delay: 1.6 }} aria-hidden="true">
         <span>SCROLL</span><i />
       </motion.div>
     </section>
+  );
+}
+
+const RECENT = events.slice(-6).reverse();
+
+/** The newest exhibits, cycling like a gallery's "recently acquired" placard. */
+function Acquisitions({ onOpen, play }: { onOpen: (e: Event) => void; play: boolean }) {
+  const [i, setI] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const { reduced } = useMuseum();
+  useEffect(() => {
+    if (!play || paused || reduced) return;
+    const t = setInterval(() => setI(v => (v + 1) % RECENT.length), 4800);
+    return () => clearInterval(t);
+  }, [play, paused, reduced]);
+  const e = RECENT[i];
+  return (
+    <div className={`acq t-${e.track.toLowerCase()}`} onPointerEnter={() => setPaused(true)} onPointerLeave={() => setPaused(false)}>
+      <div className="acq-head mono"><span><span className="live-dot" /> RECENT ACQUISITIONS</span><span>{i + 1} / {RECENT.length}</span></div>
+      <button className="acq-body" onClick={() => onOpen(e)} data-cursor="Open" onFocus={() => setPaused(true)} onBlur={() => setPaused(false)}>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.span key={e.id} className="acq-item" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.4 }}>
+            <span className="acq-date mono"><i className="dot" />{formatDate(e.date).toUpperCase()}</span>
+            <span className="acq-title serif">{e.title}</span>
+          </motion.span>
+        </AnimatePresence>
+        <ArrowUpRight size={18} className="acq-arrow" />
+      </button>
+      <div className="acq-pips" role="tablist" aria-label="Recent acquisitions">
+        {RECENT.map((r, k) => <button key={r.id} role="tab" aria-selected={k === i} aria-label={r.title} className={k === i ? 'on' : ''} onClick={() => setI(k)}><i key={k === i && !paused ? i : 'x'} /></button>)}
+      </div>
+    </div>
   );
 }
 
