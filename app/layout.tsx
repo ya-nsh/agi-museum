@@ -20,6 +20,9 @@ const serif = localFont({
   variable: '--font-serif',
   display: 'swap',
   fallback: ['Georgia', 'Times New Roman', 'serif'],
+  // Size the fallback against a serif, so the swap to Newsreader barely moves
+  // the text (next/font/local measures against Arial by default).
+  adjustFontFallback: 'Times New Roman',
 });
 const serifExt = localFont({
   src: [
@@ -33,7 +36,14 @@ const serifExt = localFont({
   declarations: [{ prop: 'unicode-range', value: 'U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF' }],
 });
 const sans = Schibsted_Grotesk({ subsets: ['latin'], variable: '--font-sans', display: 'swap' });
-const mono = IBM_Plex_Mono({ subsets: ['latin'], variable: '--font-mono', display: 'swap', weight: ['400', '500'] });
+// Monospace faces share one advance width (0.6em), so a system monospace is
+// already a near-exact stand-in while Plex loads. The default fallback is Arial
+// scaled to match, which still sets the text ~17% wider and wraps the hero
+// kicker on phones, shifting everything below it when the real font arrives.
+const mono = IBM_Plex_Mono({
+  subsets: ['latin'], variable: '--font-mono', display: 'swap', weight: ['400', '500'],
+  adjustFontFallback: false, fallback: ['Menlo', 'Consolas', 'Courier New', 'monospace'],
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
