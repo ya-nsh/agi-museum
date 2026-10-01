@@ -59,7 +59,7 @@ This is a **Next.js 16 App Router** application with React 19 and TypeScript. Mo
 
 Edit `data/events.ts` (the original timeline), `data/science-events.ts` and `data/foundations-events.ts` (exhibits 69–99: foundations, AI winters, and the research behind modern models). Accession numbers are append-only so exhibit links never break. Galleries live in `eras` in `data/events.ts`; debate perspectives in `data/perspectives.ts`; compute data in `data/compute.ts`. Dates may identify a year or month rather than a specific day. Each event distinguishes historical events, research findings, forecasts/philosophy, and company claims. Original-source links travel with the event. The collection is a selection of consequential milestones, not an exhaustive catalog of all AI research. AGI-era rhetoric is not presented as universal scientific consensus. Live sources can change after the collection cutoff.
 
-The dataset preserves the original 51-entry researched timeline, 17 science and mathematics exhibits, and 31 foundations exhibits, including its September 9 concluding exhibit. No analytics, credentials, personal information, or tracking are embedded.
+The dataset preserves the original 51-entry researched timeline, 17 science and mathematics exhibits, and 31 foundations exhibits, including its September 9 concluding exhibit. Page views are counted with [Vercel Web Analytics](https://vercel.com/docs/analytics), which is cookieless and stores no personal data; it only reports on deployments hosted on Vercel. No credentials or personal information are embedded.
 
 ## Image credit
 
