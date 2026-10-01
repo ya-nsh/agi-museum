@@ -11,7 +11,7 @@ import { useActiveSection } from './use-active-section';
 const LINKS = [
   { href: '/#galleries', label: 'Galleries' },
   { href: '/#collection', label: 'Collection' },
-  { href: '/#compute', label: 'Compute' },
+  { href: '/workshop', label: 'Workshop' },
   { href: '/#debate', label: 'Debate' },
   { href: '/timeline', label: 'Timeline' },
 ];

@@ -6,6 +6,7 @@ import { Dialog } from 'radix-ui';
 import { ArrowLeft, ArrowRight, ArrowUpRight, Check, Link2, Pause, Play, Shuffle, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { accession, eraOf, events, eras, formatDate, neighbours, related, statusNote, statusShort, type Event } from '@/lib/museum';
+import { specimensFor } from '@/data/workshop';
 import { Sigil } from './sigil';
 import { useMuseum } from './providers';
 
@@ -116,6 +117,14 @@ export function ExhibitDialog({ event, onClose, onNavigate }: { event: Event | n
                         <span className="source-host mono">{new URL(event.source).hostname.replace('www.', '')}</span>
                         <ArrowUpRight className="source-arrow" size={22} />
                       </a>
+                      {specimensFor(event.id).map(h => (
+                        <Link key={h.specimen.slug} className="source-card hands-card" href={`/exhibit/${event.id}#hands-on`} data-cursor="Try">
+                          <span className="mono">HANDS-ON SPECIMEN</span>
+                          <strong className="serif">{h.specimen.title}</strong>
+                          <span className="source-host mono">{h.specimen.verb.toUpperCase()} ON THE EXHIBIT PAGE</span>
+                          <ArrowUpRight className="source-arrow" size={22} />
+                        </Link>
+                      ))}
                       {event.id === 'exhibit-01' && <p className="credit">Archival portrait: Alan Turing, c. 1928–1929. Turing Digital Archive / <a href={TURING_CREDIT} target="_blank" rel="noreferrer">Wikimedia Commons</a>. Public domain; the photograph predates the 1950 paper.</p>}
                       <div className="dialog-related">
                         <h3 className="mono">ALSO ON THIS THREAD</h3>

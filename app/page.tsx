@@ -15,6 +15,7 @@ import { Marquee } from '@/components/museum/marquee';
 import { Preloader } from '@/components/museum/preloader';
 import { Pulse } from '@/components/museum/pulse';
 import { SectionNav } from '@/components/museum/section-nav';
+import { WorkshopTeaser } from '@/components/museum/workshop/teaser';
 import { useMuseum } from '@/components/museum/providers';
 
 export default function Museum() {
@@ -55,6 +56,7 @@ export default function Museum() {
         <Collection era={era} setEra={setEra} onOpen={open} />
         <Pulse onOpen={open} />
         <ComputeChart />
+        <WorkshopTeaser />
         <Debate />
         <ReadingRoom />
         <Closing />

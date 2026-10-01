@@ -23,7 +23,7 @@ export function ReadingRoom() {
     <section id="guide" className="reading shell" aria-labelledby="reading-title">
       <div className="section-head">
         <div>
-          <Eyebrow index="06">THE READING ROOM</Eyebrow>
+          <Eyebrow index="07">THE READING ROOM</Eyebrow>
           <RevealLines id="reading-title" className="section-title serif" lines={[<span key="a">Read the</span>, <span key="b"><em>labels.</em></span>]} />
         </div>
         <p className="section-lede">A benchmark is not a verdict and a forecast is not a fact. Every exhibit carries one of four evidence labels, so you always know what kind of claim you are looking at.</p>
@@ -75,7 +75,7 @@ export function Footer() {
         <div className="footer-brand"><Wordmark /><p>An interactive, source-backed museum of the path toward artificial general intelligence. Curated through 9 September {lastYear}.</p></div>
         <nav aria-label="Footer">
           <span className="mono">VISIT</span>
-          <Link href="/#galleries">Galleries</Link><Link href="/#collection">Collection</Link><Link href="/timeline">Complete timeline</Link><Link href="/#debate">The great debate</Link>
+          <Link href="/#galleries">Galleries</Link><Link href="/#collection">Collection</Link><Link href="/timeline">Complete timeline</Link><Link href="/workshop">The workshop</Link><Link href="/#debate">The great debate</Link><Link href="/stand">Where do you stand?</Link>
         </nav>
         <div>
           <span className="mono">COLOPHON</span>

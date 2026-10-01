@@ -11,6 +11,8 @@ An interactive, source-backed museum of the path toward artificial general intel
 - **The shape of the archive:** every exhibit as a block in its year.
 - **The compute climb:** training compute of 540 notable models from Epoch AI, with fitted growth rates (≈4.3× per year since 2010).
 - **The great debate** as an interpretive map of six perspectives by pace and where power sits.
+- **Where do you stand?** at `/stand`: eight statements place the visitor on the same debate map, with the path their answers traced, closeness to each perspective, a shareable `#r=…` link and a downloadable result card. Answers never leave the browser.
+- **The workshop** at `/workshop`: six hands-on specimens that run in the browser. Wire a McCulloch–Pitts neuron, train a perceptron (and watch it fail on XOR), talk to a reconstruction of ELIZA with its rules exposed, sit in the Chinese Room, watch backpropagation learn, and teach a reward model your taste until over-optimization turns into reward hacking. Each specimen also appears on its exhibit page and says what it simplifies.
 - **The reading room:** evidence labels, glossary and curators’ note.
 - **`/timeline`:** the complete chronology on a paper-toned reading layout with a scroll-drawn spine, chapter progress and thread highlighting.
 - **⌘K / Ctrl+K or `/`** searches the entire collection from any page.
