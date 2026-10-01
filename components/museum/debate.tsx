@@ -1,7 +1,8 @@
 'use client';
 
 import { AnimatePresence, motion } from 'motion/react';
-import { ArrowUpRight } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { useState } from 'react';
 import { perspectives } from '@/data/perspectives';
 import { Eyebrow, RevealLines } from './reveal';
@@ -16,7 +17,7 @@ export function Debate() {
     <section id="debate" className="debate shell" aria-labelledby="debate-title">
       <div className="section-head">
         <div>
-          <Eyebrow index="05">THE GREAT DEBATE</Eyebrow>
+          <Eyebrow index="06">THE GREAT DEBATE</Eyebrow>
           <RevealLines id="debate-title" className="section-title serif" lines={[<span key="a">One technology.</span>, <span key="b"><em>Many futures.</em></span>]} />
         </div>
         <p className="section-lede">The disagreement is about more than speed. It is about control, access, risk, and who gets to decide. Select a perspective on the map.</p>
@@ -60,7 +61,14 @@ export function Debate() {
           </AnimatePresence>
         </div>
       </div>
-      <p className="nuance">These are overlapping perspectives, not fixed teams. Supporting open models does not make someone e/acc; studying safety does not imply opposing progress.</p>
+      <div className="debate-foot">
+        <p className="nuance">These are overlapping perspectives, not fixed teams. Supporting open models does not make someone e/acc; studying safety does not imply opposing progress.</p>
+        <Link className="stand-cta" href="/stand" data-cursor="Begin">
+          <span className="mono">INTERACTIVE · 8 STATEMENTS</span>
+          <span className="serif">Where do <em>you</em> stand?</span>
+          <span className="stand-cta-sub">Answer eight statements and find your own place on this map. <ArrowRight size={15} /></span>
+        </Link>
+      </div>
     </section>
   );
 }

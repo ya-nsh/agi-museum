@@ -11,6 +11,7 @@ export const HOME_SECTIONS = [
   { id: 'collection', label: 'Collection' },
   { id: 'archive', label: 'The archive' },
   { id: 'compute', label: 'Compute' },
+  { id: 'workshop', label: 'Workshop' },
   { id: 'debate', label: 'Debate' },
   { id: 'guide', label: 'Reading room' },
 ];

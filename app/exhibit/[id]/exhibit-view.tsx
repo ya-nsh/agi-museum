@@ -13,6 +13,8 @@ import { ExhibitCard } from '@/components/museum/collection';
 import { TURING_CREDIT } from '@/components/museum/exhibit-dialog';
 import { Reveal, RevealLines } from '@/components/museum/reveal';
 import { Sigil } from '@/components/museum/sigil';
+import { SpecimenPanel } from '@/components/museum/workshop/specimen';
+import { specimensFor } from '@/data/workshop';
 
 export default function ExhibitView({ id }: { id: string }) {
   const e = events.find(x => x.id === id)!;
@@ -22,6 +24,7 @@ export default function ExhibitView({ id }: { id: string }) {
   const { prev, next, index } = neighbours(e);
   const era = eras[eraOf(e)];
   const go = (x: Event) => router.push(`/exhibit/${x.id}`);
+  const hands = specimensFor(e.id);
 
   useEffect(() => {
     const onKey = (k: KeyboardEvent) => {
@@ -79,6 +82,13 @@ export default function ExhibitView({ id }: { id: string }) {
           </div>
           {e.id === 'exhibit-01' && <p className="credit">Archival portrait: Alan Turing, c. 1928–1929. Turing Digital Archive / <a href={TURING_CREDIT} target="_blank" rel="noreferrer">Wikimedia Commons</a>. Public domain; the photograph predates the 1950 paper.</p>}
         </section>
+
+        {hands.length > 0 && (
+          <div id="hands-on" className="xp-hands shell">
+            <p className="mono xp-hands-label">HANDS-ON · {hands.length === 1 ? 'TRY IT YOURSELF' : `${hands.length} SPECIMENS FOR THIS EXHIBIT`}</p>
+            {hands.map(h => <SpecimenPanel key={h.specimen.slug} specimen={h.specimen} preset={h.preset} exhibitLink={h.specimen.exhibit !== e.id} />)}
+          </div>
+        )}
 
         <section className="xp-related shell" aria-labelledby="related-title">
           <p className="mono" id="related-title">ALSO ON THE {e.track.toUpperCase()} THREAD</p>

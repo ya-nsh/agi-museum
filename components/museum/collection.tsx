@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { ArrowDownWideNarrow, ArrowUpRight, ArrowUpWideNarrow, LayoutGrid, List, Search, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { statuses, tracks, type Track } from '@/data/events';
+import { specimensFor } from '@/data/workshop';
 import { accession, eraOf, eras, events, formatDate, statusShort, type Event } from '@/lib/museum';
 import { Sigil } from './sigil';
 import { Eyebrow, RevealLines } from './reveal';
@@ -146,7 +147,7 @@ export function ExhibitCard({ e, onOpen }: { e: Event; onOpen: (e: Event) => voi
         <span className="card-title serif">{e.title}</span>
         <span className="card-summary">{e.summary}</span>
       </span>
-      <span className="card-foot mono"><span>GALLERY {eras[eraOf(e)].numeral}</span><span className="card-open">EXPLORE <ArrowUpRight size={14} /></span></span>
+      <span className="card-foot mono"><span>GALLERY {eras[eraOf(e)].numeral}{specimensFor(e.id).length > 0 && <b className="card-hands"> · HANDS-ON</b>}</span><span className="card-open">EXPLORE <ArrowUpRight size={14} /></span></span>
     </button>
   );
 }
