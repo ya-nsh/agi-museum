@@ -6,6 +6,7 @@ import { ArrowUpRight } from 'lucide-react';
 import type { ComponentType } from 'react';
 import { specimens, type Specimen, type SpecimenSlug } from '@/data/workshop';
 import { accession, events } from '@/lib/museum';
+import { passport } from '@/lib/passport';
 import { Reveal } from '../reveal';
 
 const loading = () => <div className="sp-loading mono" aria-hidden="true">SETTING UP THE SPECIMEN…</div>;
@@ -27,6 +28,7 @@ export const specimenNumber = (s: Specimen) => String(specimens.indexOf(s) + 1).
 export function SpecimenPanel({ specimen, preset, id, exhibitLink = true }: { specimen: Specimen; preset?: string; id?: string; exhibitLink?: boolean }) {
   const e = exhibitOf(specimen);
   const Stage = STAGES[specimen.slug];
+  const touch = () => passport.mark(`workshop:${specimen.slug}`);
   return (
     <section id={id ?? specimen.slug} className={`specimen t-${e.track.toLowerCase()}`} aria-labelledby={`${id ?? specimen.slug}-title`}>
       <header className="sp-head">
@@ -39,7 +41,8 @@ export function SpecimenPanel({ specimen, preset, id, exhibitLink = true }: { sp
           {exhibitLink && <Link className="sp-exhibit mono" href={`/exhibit/${e.id}`}>FROM EXHIBIT {accession(e)} · {e.title.toUpperCase()} <ArrowUpRight size={13} /></Link>}
         </div>
       </header>
-      <div className="sp-stage"><Stage preset={preset} /></div>
+      {/* Any interaction with the stage counts toward the workshop stamp. */}
+      <div className="sp-stage" onPointerDownCapture={touch} onKeyDownCapture={touch}><Stage preset={preset} /></div>
       <footer className="sp-notes">
         <Reveal className="sp-note"><p className="mono">WHAT IT SHOWS</p><p>{specimen.shows}</p></Reveal>
         <Reveal className="sp-note" delay={0.08}><p className="mono">WHAT IT SIMPLIFIES</p><p>{specimen.simplifies}</p></Reveal>

@@ -4,10 +4,10 @@ import { motion } from 'motion/react';
 import { useMemo } from 'react';
 import { seeded, type Event } from '@/lib/museum';
 
-type Shape = { d: string; w: number; o: number };
+export type Shape = { d: string; w: number; o: number };
 
-/** Build a deterministic, one-of-a-kind accession glyph for an exhibit. */
-function build(e: Event): Shape[] {
+/** Build a deterministic, one-of-a-kind accession glyph for an exhibit (paths in a 100 × 100 box). */
+export function sigilShapes(e: Event): Shape[] {
   const r = seeded(e.id + e.date);
   const shapes: Shape[] = [];
   const pt = (a: number, rad: number) => `${(50 + Math.cos(a) * rad).toFixed(2)} ${(50 + Math.sin(a) * rad).toFixed(2)}`;
@@ -72,7 +72,7 @@ function build(e: Event): Shape[] {
 }
 
 export function Sigil({ event, draw = false, className }: { event: Event; draw?: boolean; className?: string }) {
-  const shapes = useMemo(() => build(event), [event]);
+  const shapes = useMemo(() => sigilShapes(event), [event]);
   return (
     <svg className={`sigil ${className ?? ''}`} viewBox="0 0 100 100" aria-hidden="true" fill="none" stroke="currentColor" strokeLinecap="round">
       {shapes.map((s, i) => draw

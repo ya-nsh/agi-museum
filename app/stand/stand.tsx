@@ -13,6 +13,8 @@ import { Footer } from '@/components/museum/closing';
 import { RevealLines } from '@/components/museum/reveal';
 import { useMuseum } from '@/components/museum/providers';
 import { accession, events, type Event } from '@/lib/museum';
+import { download, siteFonts } from '@/lib/canvas-art';
+import { passport } from '@/lib/passport';
 
 type Stage = 'intro' | 'quiz' | 'result';
 const pos = (v: number) => `${50 + v * 42}%`;
@@ -52,10 +54,7 @@ function StanceMap({ answers, focus, onFocus, compact, hideMe }: { answers: Answ
 
 /** A 1200 × 630 image of the result, drawn on a canvas so it can be saved and shared. */
 async function drawCard(answers: Answer[]) {
-  await document.fonts.ready;
-  const css = getComputedStyle(document.documentElement);
-  const serif = css.getPropertyValue('--font-serif').trim() || 'Georgia, serif';
-  const mono = css.getPropertyValue('--font-mono').trim() || 'monospace';
+  const { serif, mono } = await siteFonts();
   const c = document.createElement('canvas');
   c.width = 1200; c.height = 630;
   const g = c.getContext('2d')!;
@@ -99,7 +98,7 @@ async function drawCard(answers: Answer[]) {
   g.font = `500 14px ${mono}`; g.fillStyle = '#7b766c';
   g.fillText('AN INTERPRETIVE MAP, NOT A MEASUREMENT', 650, 540);
   g.fillText('AGI-MUSEUM.VERCEL.APP/STAND', 650, 566);
-  return new Promise<Blob | null>(res => c.toBlob(res, 'image/png'));
+  return c;
 }
 
 export default function Stand() {
@@ -136,6 +135,7 @@ export default function Stand() {
     setStage('result');
     history.replaceState(null, '', `#r=${encode(next)}`);
     try { sessionStorage.setItem(OWN_KEY, encode(next)); } catch { /* storage unavailable */ }
+    passport.mark('stand');
     scrollTo(0, 0);
   }, [answers, q, scrollTo]);
 
@@ -162,13 +162,9 @@ export default function Stand() {
   const copy = async () => {
     try { await navigator.clipboard.writeText(`${location.origin}${location.pathname}#r=${encode(answers)}`); toast('Link to your result copied'); } catch { toast('Copying is not available in this browser'); }
   };
-  const download = async () => {
-    const blob = await drawCard(answers);
-    if (!blob) { toast('Could not create the image'); return; }
-    const url = URL.createObjectURL(blob);
-    const a = Object.assign(document.createElement('a'), { href: url, download: 'agi-museum-where-i-stand.png' });
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  const save = async () => {
+    if (await download(await drawCard(answers), 'agi-museum-where-i-stand.png')) passport.mark('shop');
+    else toast('Could not create the image');
   };
 
   return (
@@ -274,7 +270,7 @@ export default function Stand() {
 
               <div className="result-actions">
                 {!shared && <button className="btn btn-primary" onClick={copy}><span>Copy a link to this result</span><Link2 size={16} /></button>}
-                <button className="btn btn-ghost" onClick={download}><span>Save as image</span><Download size={16} /></button>
+                <button className="btn btn-ghost" onClick={save}><span>Save as image</span><Download size={16} /></button>
                 <button className="btn btn-ghost" onClick={start}><span>{shared ? 'Take it yourself' : 'Start again'}</span><RotateCcw size={16} /></button>
               </div>
 

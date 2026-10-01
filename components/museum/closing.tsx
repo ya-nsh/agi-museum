@@ -75,7 +75,7 @@ export function Footer() {
         <div className="footer-brand"><Wordmark /><p>An interactive, source-backed museum of the path toward artificial general intelligence. Curated through 9 September {lastYear}.</p></div>
         <nav aria-label="Footer">
           <span className="mono">VISIT</span>
-          <Link href="/#galleries">Galleries</Link><Link href="/#collection">Collection</Link><Link href="/timeline">Complete timeline</Link><Link href="/workshop">The workshop</Link><Link href="/#debate">The great debate</Link><Link href="/stand">Where do you stand?</Link>
+          <Link href="/#galleries">Galleries</Link><Link href="/#collection">Collection</Link><Link href="/timeline">Complete timeline</Link><Link href="/workshop">The workshop</Link><Link href="/time-machine">The time machine</Link><Link href="/people">Who’s who</Link><Link href="/pairs">Pendants</Link><Link href="/#debate">The great debate</Link><Link href="/stand">Where do you stand?</Link><Link href="/shop">Gift shop</Link><Link href="/passport">Your passport</Link>
         </nav>
         <div>
           <span className="mono">COLOPHON</span>

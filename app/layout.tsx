@@ -4,6 +4,7 @@ import { IBM_Plex_Mono, Newsreader, Schibsted_Grotesk } from 'next/font/google';
 import { Providers } from '@/components/museum/providers';
 import { Cursor } from '@/components/museum/cursor';
 import { ScrollTop } from '@/components/museum/section-nav';
+import { PassportWatcher } from '@/components/museum/passport/watcher';
 import { events } from '@/data/events';
 import './globals.css';
 
@@ -38,6 +39,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <Providers>
           {children}
           <ScrollTop />
+          <PassportWatcher />
           <Cursor />
         </Providers>
         <div className="grain" aria-hidden="true" />

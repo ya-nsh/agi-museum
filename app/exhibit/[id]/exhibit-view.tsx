@@ -15,6 +15,10 @@ import { Reveal, RevealLines } from '@/components/museum/reveal';
 import { Sigil } from '@/components/museum/sigil';
 import { SpecimenPanel } from '@/components/museum/workshop/specimen';
 import { specimensFor } from '@/data/workshop';
+import { pairs, pairsFor } from '@/data/pairs';
+import { passport } from '@/lib/passport';
+import { Credits } from '@/components/museum/people/credits';
+import { Diptych } from '@/components/museum/pairs/diptych';
 
 export default function ExhibitView({ id }: { id: string }) {
   const e = events.find(x => x.id === id)!;
@@ -25,6 +29,8 @@ export default function ExhibitView({ id }: { id: string }) {
   const era = eras[eraOf(e)];
   const go = (x: Event) => router.push(`/exhibit/${x.id}`);
   const hands = specimensFor(e.id);
+  const pendants = pairsFor(e.id);
+  useEffect(() => { passport.seeExhibit(e.id); }, [e.id]);
 
   useEffect(() => {
     const onKey = (k: KeyboardEvent) => {
@@ -75,7 +81,7 @@ export default function ExhibitView({ id }: { id: string }) {
             <p className="serif">{e.significance}</p>
           </Reveal>
           <div className="xp-facts">
-            <Reveal className="xp-fact" delay={0.05}><p className="mono">PEOPLE & INSTITUTIONS</p><p>{e.people}</p></Reveal>
+            <Reveal className="xp-fact" delay={0.05}><p className="mono">PEOPLE & INSTITUTIONS</p><p><Credits event={e} /></p></Reveal>
             <Reveal className="xp-fact" delay={0.1}><p className="mono">EVIDENCE</p><p><span className="status-chip">{statusShort[e.status]}</span></p><p className="xp-note">{statusNote[e.status]}</p></Reveal>
             <Reveal className="xp-fact" delay={0.15}><p className="mono">GALLERY</p><p>{era.numeral}. {era.title}</p><p className="xp-note">{era.label} · {era.description}</p></Reveal>
             <Reveal className="xp-fact" delay={0.2}><p className="mono">ORIGINAL SOURCE</p><a href={e.source} target="_blank" rel="noreferrer">{e.sourceName} <ArrowUpRight size={14} /></a><p className="xp-note">{new URL(e.source).hostname.replace('www.', '')}</p></Reveal>
@@ -87,6 +93,13 @@ export default function ExhibitView({ id }: { id: string }) {
           <div id="hands-on" className="xp-hands shell">
             <p className="mono xp-hands-label">HANDS-ON · {hands.length === 1 ? 'TRY IT YOURSELF' : `${hands.length} SPECIMENS FOR THIS EXHIBIT`}</p>
             {hands.map(h => <SpecimenPanel key={h.specimen.slug} specimen={h.specimen} preset={h.preset} exhibitLink={h.specimen.exhibit !== e.id} />)}
+          </div>
+        )}
+
+        {pendants.length > 0 && (
+          <div className="xp-pendants shell">
+            <p className="mono xp-hands-label">HUNG AS A PAIR · <Link href="/pairs">ALL PENDANTS</Link></p>
+            {pendants.map(p => <Diptych key={p.id} pair={p} index={pairs.indexOf(p)} />)}
           </div>
         )}
 

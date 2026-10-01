@@ -5,6 +5,7 @@ import { ArrowDownWideNarrow, ArrowUpRight, ArrowUpWideNarrow, LayoutGrid, List,
 import { useMemo, useState } from 'react';
 import { statuses, tracks, type Track } from '@/data/events';
 import { specimensFor } from '@/data/workshop';
+import { usePassport } from '@/lib/passport';
 import { accession, eraOf, eras, events, formatDate, statusShort, type Event } from '@/lib/museum';
 import { Sigil } from './sigil';
 import { Eyebrow, RevealLines } from './reveal';
@@ -124,6 +125,7 @@ function Chip({ on, children, ...rest }: { on: boolean; children: React.ReactNod
 }
 
 export function ExhibitCard({ e, onOpen }: { e: Event; onOpen: (e: Event) => void }) {
+  const seen = usePassport().seen.includes(e.id);
   const move = (ev: React.PointerEvent<HTMLButtonElement>) => {
     const r = ev.currentTarget.getBoundingClientRect();
     const px = (ev.clientX - r.left) / r.width, py = (ev.clientY - r.top) / r.height;
@@ -137,7 +139,7 @@ export function ExhibitCard({ e, onOpen }: { e: Event; onOpen: (e: Event) => voi
     <button className={`card t-${e.track.toLowerCase()} ${e.id === 'exhibit-01' ? 'has-photo' : ''}`} onClick={() => onOpen(e)} onPointerMove={move} onPointerLeave={leave} data-cursor="View">
       <span className="card-glow" aria-hidden="true" />
       {e.id === 'exhibit-01' && <img className="card-photo" src="/alan-turing.jpg" alt="" width={675} height={919} loading="lazy" />}
-      <span className="card-top mono"><span>NO. {accession(e)}</span><span>{statusShort[e.status].toUpperCase()}</span></span>
+      <span className="card-top mono"><span>NO. {accession(e)}{seen && <b className="card-seen" title="In your passport"> · SEEN</b>}</span><span>{statusShort[e.status].toUpperCase()}</span></span>
       <span className="card-art">
         <span className="card-year serif">{e.year}</span>
         <Sigil event={e} className="card-sigil" />
