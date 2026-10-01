@@ -92,12 +92,13 @@ html.has-cursor input, html.has-cursor select { cursor: text !important; }
 .cursor { position: fixed; inset: 0; z-index: 9999; pointer-events: none; transition: opacity 0.3s; }
 .cursor.is-hidden { opacity: 0; }
 .cursor-dot { position: fixed; left: 0; top: 0; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: var(--accent); }
-.cursor-ring {
-  position: fixed; left: 0; top: 0; translate: -50% -50%; border-radius: 50%;
-  border: 1px solid rgba(237, 232, 220, 0.45); display: grid; place-items: center;
+.cursor-ring { position: fixed; left: 0; top: 0; }
+.cursor-ring-shape {
+  position: absolute; left: -44px; top: -44px; width: 88px; height: 88px; border-radius: 50%;
+  border: var(--bw, 1px) solid rgba(237, 232, 220, 0.45); display: grid; place-items: center;
   transition: background 0.3s, border-color 0.3s;
 }
-.cursor-ring.has-label { background: var(--accent); border-color: var(--accent); }
+.cursor-ring-shape.has-label { background: var(--accent); border-color: var(--accent); }
 .cursor-ring span { font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; color: var(--accent-ink); text-transform: uppercase; }
 
 /* ---------- Buttons ---------- */
@@ -244,7 +245,8 @@ html[data-intro='play'] .hero { --intro: 0.95s; }
 .marquee { border-block: 1px solid var(--line); padding: 10px 0; overflow: hidden; }
 .marquee-row { display: flex; width: max-content; padding: 14px 0; }
 .marquee-row + .marquee-row { border-top: 1px solid var(--line); }
-.marquee-track { display: flex; flex-shrink: 0; animation: marquee 140s linear infinite; }
+.marquee-track { position: relative; display: flex; flex-shrink: 0; animation: marquee 140s linear infinite; }
+.marquee-tail { position: absolute; left: 100%; top: 0; display: flex; }
 .marquee-row.reverse .marquee-track { animation-direction: reverse; animation-duration: 160s; }
 .marquee:hover .marquee-track { animation-play-state: paused; }
 @keyframes marquee { to { transform: translateX(-100%); } }

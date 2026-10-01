@@ -36,13 +36,22 @@ function update(fn: (s: PassportState) => PassportState) {
   if (next !== prev) save({ ...next, since: next.since ?? new Date().toISOString().slice(0, 10) });
 }
 
+// Another tab updated the passport. One window listener serves every
+// subscriber (each exhibit card subscribes), attached while any are listening.
+const onStorage = (e: StorageEvent) => {
+  if (e.key !== KEY && e.key !== null) return;
+  cache = null;
+  listeners.forEach(cb => cb());
+};
+
 export const passport = {
   subscribe(cb: () => void) {
+    if (!listeners.size) addEventListener('storage', onStorage);
     listeners.add(cb);
-    // Another tab updated the passport.
-    const onStorage = (e: StorageEvent) => { if (e.key === KEY || e.key === null) { cache = null; cb(); } };
-    addEventListener('storage', onStorage);
-    return () => { listeners.delete(cb); removeEventListener('storage', onStorage); };
+    return () => {
+      listeners.delete(cb);
+      if (!listeners.size) removeEventListener('storage', onStorage);
+    };
   },
   get,
   seeExhibit(id: string) { update(s => (s.seen.includes(id) ? s : { ...s, seen: [...s.seen, id] })); },

@@ -5,6 +5,50 @@ import { useEffect, useRef } from 'react';
 import { seeded } from '@/lib/museum';
 import { useMuseum } from './providers';
 
+const ACCENT = 'rgb(212,247,122)', BONE = 'rgb(237,232,220)';
+
+/**
+ * The two nearest neighbours of each point on the unit sphere, as index pairs.
+ * Points are binned into a uniform grid and each search widens ring by ring
+ * until no unvisited cell can hold anything closer: exact, and close to linear
+ * rather than the N² of comparing every pair.
+ */
+function nearestTwo(pts: Float32Array, n: number) {
+  const CELL = 0.2, DIM = Math.ceil(2 / CELL) + 1;
+  const cellOf = (v: number) => Math.min(DIM - 1, Math.floor((v + 1) / CELL));
+  const buckets = new Map<number, number[]>();
+  const key = (x: number, y: number, z: number) => (x * DIM + y) * DIM + z;
+  for (let i = 0; i < n; i++) {
+    const k = key(cellOf(pts[i * 3]), cellOf(pts[i * 3 + 1]), cellOf(pts[i * 3 + 2]));
+    const b = buckets.get(k);
+    if (b) b.push(i); else buckets.set(k, [i]);
+  }
+  const out = new Int32Array(n * 2).fill(-1);
+  for (let i = 0; i < n; i++) {
+    const cx = cellOf(pts[i * 3]), cy = cellOf(pts[i * 3 + 1]), cz = cellOf(pts[i * 3 + 2]);
+    let b1 = -1, b2 = -1, d1 = Infinity, d2 = Infinity;
+    for (let r = 0; r < DIM; r++) {
+      // Visit only the shell of cells at Chebyshev distance r.
+      for (let x = cx - r; x <= cx + r; x++) for (let y = cy - r; y <= cy + r; y++) for (let z = cz - r; z <= cz + r; z++) {
+        if (Math.max(Math.abs(x - cx), Math.abs(y - cy), Math.abs(z - cz)) !== r) continue;
+        if (x < 0 || y < 0 || z < 0 || x >= DIM || y >= DIM || z >= DIM) continue;
+        const b = buckets.get(key(x, y, z));
+        if (!b) continue;
+        for (const j of b) {
+          if (j === i) continue;
+          const dx = pts[i * 3] - pts[j * 3], dy = pts[i * 3 + 1] - pts[j * 3 + 1], dz = pts[i * 3 + 2] - pts[j * 3 + 2];
+          const d = dx * dx + dy * dy + dz * dz;
+          if (d < d1) { d2 = d1; b2 = b1; d1 = d; b1 = j; } else if (d < d2) { d2 = d; b2 = j; }
+        }
+      }
+      // Anything in a farther shell is at least r cells away.
+      if (b2 >= 0 && d2 <= (r * CELL) ** 2) break;
+    }
+    out[i * 2] = b1; out[i * 2 + 1] = b2;
+  }
+  return out;
+}
+
 /**
  * The hero artwork: an 80-column, 12-row IBM punch card whose holes fold into a
  * rotating neural sphere, 1950 becoming 2026. Signals travel along the sphere's
@@ -59,15 +103,9 @@ export function NeuralField({ play, scroll }: { play: boolean; scroll?: MotionVa
       // Two nearest neighbours per node: a sparse, legible network.
       const list: number[] = [];
       const seen = new Set<number>();
+      const near = nearestTwo(sphere, N);
       for (let i = 0; i < N; i++) {
-        let b1 = -1, b2 = -1, d1 = 9, d2 = 9;
-        for (let j = 0; j < N; j++) {
-          if (i === j) continue;
-          const dx = sphere[i * 3] - sphere[j * 3], dy = sphere[i * 3 + 1] - sphere[j * 3 + 1], dz = sphere[i * 3 + 2] - sphere[j * 3 + 2];
-          const d = dx * dx + dy * dy + dz * dz;
-          if (d < d1) { d2 = d1; b2 = b1; d1 = d; b1 = j; } else if (d < d2) { d2 = d; b2 = j; }
-        }
-        for (const j of [b1, b2]) {
+        for (const j of [near[i * 2], near[i * 2 + 1]]) {
           const key = Math.min(i, j) * 4096 + Math.max(i, j);
           if (j >= 0 && !seen.has(key)) { seen.add(key); list.push(i, j); }
         }
@@ -81,6 +119,19 @@ export function NeuralField({ play, scroll }: { play: boolean; scroll?: MotionVa
     let adjacency: number[][] = [];
     let pulses: { e: number; t: number; dir: number; v: number }[] = [];
     const sx = new Float32Array(1400), sy = new Float32Array(1400), sz = new Float32Array(1400);
+    // A signal's glow, drawn once and stamped with globalAlpha, instead of a new
+    // radial gradient per signal per frame.
+    let glow: HTMLCanvasElement | null = null;
+    function makeGlow() {
+      glow = document.createElement('canvas');
+      glow.width = glow.height = Math.ceil(18 * dpr);
+      const g = glow.getContext('2d')!, r = glow.width / 2;
+      const grad = g.createRadialGradient(r, r, 0, r, r, r);
+      grad.addColorStop(0, 'rgba(212,247,122,0.9)');
+      grad.addColorStop(1, 'rgba(212,247,122,0)');
+      g.fillStyle = grad;
+      g.fillRect(0, 0, glow.width, glow.height);
+    }
 
     function resize() {
       const r = cv!.getBoundingClientRect();
@@ -88,6 +139,7 @@ export function NeuralField({ play, scroll }: { play: boolean; scroll?: MotionVa
       W = r.width; H = r.height;
       dpr = Math.min(2, devicePixelRatio || 1);
       cv!.width = Math.round(W * dpr); cv!.height = Math.round(H * dpr);
+      makeGlow();
       if (!N || (W < 720 ? 36 : 80) !== prevCols) build();
     }
 
@@ -130,8 +182,8 @@ export function NeuralField({ play, scroll }: { play: boolean; scroll?: MotionVa
         const X = card[i * 2] * (1 - m) + x1 * m, Y = card[i * 2 + 1] * (1 - m) + y2 * m, Z = wave * (1 - m) + z2 * m;
         const f = 2.8 / (2.8 - Z);
         let x = cx + X * R * f, y = cy + Y * R * f;
-        const dx = x - pointer.x, dy = y - pointer.y, d = Math.hypot(dx, dy);
-        if (d < 110 && d > 0.01) { const push = (1 - d / 110) ** 2 * 26; x += (dx / d) * push; y += (dy / d) * push; }
+        const dx = x - pointer.x, dy = y - pointer.y, dd = dx * dx + dy * dy;
+        if (dd < 12100 && dd > 0.0001) { const d = Math.sqrt(dd), push = (1 - d / 110) ** 2 * 26; x += (dx / d) * push; y += (dy / d) * push; }
         sx[i] = x; sy[i] = y; sz[i] = Z;
       }
 
@@ -165,16 +217,20 @@ export function NeuralField({ play, scroll }: { play: boolean; scroll?: MotionVa
         }
       }
 
-      // Nodes / punch holes.
+      // Nodes / punch holes. Two solid colours with per-node globalAlpha, so no
+      // colour strings are built or parsed per node.
+      let ink = '';
       for (let i = 0; i < N; i++) {
         const depth = (sz[i] + 1) / 2;
         const holeA = punched[i] ? 0.95 : 0.2, sphereA = 0.18 + depth * 0.75;
-        const a = (holeA * (1 - m) + sphereA * m) * fade;
         const w = (punched[i] ? 2.4 : 1.6) * (1 - m) + (0.9 + depth * 1.6) * m;
         const h = (punched[i] ? 5.2 : 1.6) * (1 - m) + (0.9 + depth * 1.6) * m;
-        ctx!.fillStyle = punched[i] && m < 0.6 ? `rgba(212,247,122,${a})` : `rgba(237,232,220,${a})`;
+        const want = punched[i] && m < 0.6 ? ACCENT : BONE;
+        if (want !== ink) { ctx!.fillStyle = want; ink = want; }
+        ctx!.globalAlpha = (holeA * (1 - m) + sphereA * m) * fade;
         ctx!.fillRect(sx[i] - w / 2, sy[i] - h / 2, w, h);
       }
+      ctx!.globalAlpha = 1;
 
       // Signals travelling along the network.
       if (m > 0.6 && edges.length) {
@@ -192,12 +248,10 @@ export function NeuralField({ play, scroll }: { play: boolean; scroll?: MotionVa
           const [from, to] = p.dir > 0 ? [a, c] : [c, a];
           const x = sx[from] + (sx[to] - sx[from]) * p.t, y = sy[from] + (sy[to] - sy[from]) * p.t;
           const depth = ((sz[from] + sz[to]) / 2 + 1) / 2;
-          const g = ctx!.createRadialGradient(x, y, 0, x, y, 9);
-          g.addColorStop(0, `rgba(212,247,122,${0.9 * pa * depth})`);
-          g.addColorStop(1, 'rgba(212,247,122,0)');
-          ctx!.fillStyle = g;
-          ctx!.fillRect(x - 9, y - 9, 18, 18);
+          ctx!.globalAlpha = pa * depth;
+          ctx!.drawImage(glow!, x - 9, y - 9, 18, 18);
         }
+        ctx!.globalAlpha = 1;
       }
     }
 

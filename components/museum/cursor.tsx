@@ -1,8 +1,10 @@
 'use client';
 
-import { motion, useMotionValue, useSpring } from 'motion/react';
+import { motion, useMotionValue, useSpring, type MotionStyle } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { useMuseum } from './providers';
+
+const RING = 88;
 
 /** A quiet two-part cursor: an exact dot and a trailing ring that grows over interactive things. */
 export function Cursor() {
@@ -51,9 +53,9 @@ export function Cursor() {
       const hover = !!t && t.tagName !== 'INPUT';
       setState(s => (s.hover === hover && s.label === label && !s.hidden ? s : { ...s, hover, label, hidden: false }));
     };
-    const down = () => setState(s => ({ ...s, down: true }));
-    const up = () => setState(s => ({ ...s, down: false }));
-    const leave = () => setState(s => ({ ...s, hidden: true }));
+    const down = () => setState(s => (s.down ? s : { ...s, down: true }));
+    const up = () => setState(s => (s.down ? { ...s, down: false } : s));
+    const leave = () => setState(s => (s.hidden ? s : { ...s, hidden: true }));
     addEventListener('pointermove', move, { passive: true });
     addEventListener('pointerdown', down);
     addEventListener('pointerup', up);
@@ -68,12 +70,18 @@ export function Cursor() {
   }, [enabled, x, y]);
 
   if (!enabled) return null;
-  const size = state.label ? 88 : state.hover ? 46 : 26;
+  // The ring is drawn at its largest size and scaled down, so growing it is a
+  // compositor-only transform rather than a width/height layout every frame.
+  // Its border is thickened by the inverse scale to stay a 1px hairline.
+  const scale = (state.label ? RING : state.hover ? 46 : 26) / RING;
   return (
     <div className={`cursor ${state.hidden ? 'is-hidden' : ''}`} aria-hidden="true">
       <motion.div className="cursor-dot" style={{ x, y }} animate={{ scale: state.hover ? 0 : state.down ? 0.6 : 1 }} />
-      <motion.div className={`cursor-ring ${state.label ? 'has-label' : ''}`} style={{ x: rx, y: ry }} animate={{ width: size, height: size, scale: state.down ? 0.85 : 1 }} transition={{ type: 'spring', stiffness: 300, damping: 26 }}>
-        {state.label && <motion.span initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }}>{state.label}</motion.span>}
+      <motion.div className="cursor-ring" style={{ x: rx, y: ry }}>
+        <motion.div className={`cursor-ring-shape ${state.label ? 'has-label' : ''}`} style={{ '--bw': `${1 / scale}px` } as MotionStyle}
+          animate={{ scale: scale * (state.down ? 0.85 : 1) }} transition={{ type: 'spring', stiffness: 300, damping: 26 }}>
+          {state.label && <span>{state.label}</span>}
+        </motion.div>
       </motion.div>
     </div>
   );
