@@ -271,6 +271,9 @@ html[data-intro='play'] .hero { --intro: 0.95s; }
 .manifesto-text .lit { color: var(--accent); font-style: italic; }
 /* Each word lights over its own slice of the scroll progress (--p, 0–1). Until --p is set, words stay fully lit. */
 .manifesto-text span { opacity: clamp(0.14, calc(0.14 + 0.86 * (var(--p) * var(--n) - var(--w))), 1); }
+/* The dimmed words are a scroll effect; anyone asking for more contrast or less motion reads it fully lit. */
+@media (prefers-contrast: more) { .manifesto-text span { opacity: 1; } }
+html[data-motion='reduced'] .manifesto-text span { opacity: 1; }
 
 /* ---------- Galleries ---------- */
 .galleries { position: relative; }
@@ -452,6 +455,8 @@ html[data-intro='play'] .hero { --intro: 0.95s; }
 .chart .trend.early { stroke: var(--ink2); stroke-width: 1.5; stroke-dasharray: 5 6; opacity: 0.7; }
 .chart .trend.modern { stroke: var(--accent); stroke-width: 2.5; filter: drop-shadow(0 0 8px rgba(212, 247, 122, 0.5)); }
 .chart .landmark { cursor: pointer; }
+.chart .landmark:focus { outline: none; }
+.chart .landmark:focus-visible .ring { stroke-width: 2; }
 .chart .landmark .hit { fill: transparent; }
 .chart .landmark .core { fill: var(--accent); }
 .chart .landmark .ring { fill: none; stroke: var(--accent); opacity: 0.35; transform-box: fill-box; transform-origin: center; transition: transform 0.4s var(--ease), opacity 0.3s; }
@@ -736,7 +741,8 @@ html[data-motion='reduced'] .chart .points circle { opacity: 0.32; }
 .tl-threads { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .tl-threads > .mono { color: var(--dim); margin-right: 6px; }
 .tl-thread { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; border: 1px solid var(--line2); border-radius: 999px; font-size: 14px; color: var(--ink2); transition: all 0.3s var(--ease); }
-.tl-thread sup { font-size: 12px; opacity: 0.6; }
+.tl-thread sup { font-size: 12px; color: var(--dim); }
+.tl-thread.on sup { color: inherit; }
 .tl-thread:hover { border-color: var(--ink); color: var(--ink); }
 .tl-thread.on { background: var(--ink); border-color: var(--ink); color: var(--bg); }
 .tl-thread.on .dot { background: var(--bg); }
@@ -935,10 +941,10 @@ html[data-motion='reduced'] .chart .points circle { opacity: 0.32; }
 .acq-arrow { position: absolute; right: 0; top: 2px; color: var(--dim); transition: transform 0.4s var(--ease), color 0.3s; }
 .acq-body:hover .acq-arrow { color: var(--tc); transform: translate(3px, -3px); }
 .acq-pips { display: flex; gap: 6px; }
-.acq-pips button { flex: 1; height: 14px; display: flex; align-items: center; }
+.acq-pips button { flex: 1; height: 24px; margin-block: -5px; display: flex; align-items: center; }
 .acq-pips button::before { content: ''; flex: 1; height: 2px; background: var(--line2); border-radius: 2px; }
 .acq-pips button { position: relative; }
-.acq-pips button i { position: absolute; left: 0; right: 0; top: 6px; height: 2px; border-radius: 2px; background: var(--ink); transform: scaleX(0); transform-origin: left; }
+.acq-pips button i { position: absolute; left: 0; right: 0; top: 11px; height: 2px; border-radius: 2px; background: var(--ink); transform: scaleX(0); transform-origin: left; }
 .acq-pips button.on i { animation: pip 4.8s linear forwards; }
 .acq:hover .acq-pips button.on i { animation-play-state: paused; }
 @keyframes pip { to { transform: scaleX(1); } }
@@ -1704,10 +1710,12 @@ html.has-cursor .tm-range { cursor: none !important; }
 .otd-strip { grid-area: strip; display: grid; grid-template-columns: repeat(31, minmax(0, 1fr)); gap: 2px; padding-top: 14px; border-top: 1px solid var(--line); }
 .otd-day { display: grid; justify-items: center; gap: 6px; }
 .otd-day > i, .otd-day button { width: 10px; height: 10px; display: grid; place-items: center; }
+/* A 24px hit area around the 10px dot, without moving it. */
+.otd-day button { width: 24px; height: 24px; margin: -7px; position: relative; }
 .otd-day > i::after { content: ''; width: 3px; height: 3px; border-radius: 50%; background: var(--line2); }
 .otd-day button i { display: block; width: 10px; height: 10px; border-radius: 50%; background: var(--ink2); transition: transform 0.3s var(--ease), background 0.3s; }
 .otd-day button:hover i { transform: scale(1.5); background: var(--accent); }
-.otd-day b { font-weight: 400; font-size: 10px; color: var(--faint); }
+.otd-day b { font-weight: 400; font-size: 10px; color: var(--dim); }
 .otd-day.today b { color: var(--accent); }
 .otd-day.today > i::after { width: 8px; height: 8px; background: transparent; border: 1.5px solid var(--accent); }
 .otd-day.today.has button i { background: var(--accent); box-shadow: 0 0 0 4px rgba(212, 247, 122, 0.2); }
@@ -1770,4 +1778,8 @@ html.has-cursor .tm-range { cursor: none !important; }
   .pass-book { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pass-slot .stamp { width: 104px; height: 104px; }
   .room-tile { min-height: 0; }
+}
+@media (max-width: 440px) {
+  /* Wide enough columns for 24px tap targets on small phones. */
+  .otd-strip { grid-template-columns: repeat(11, minmax(0, 1fr)); }
 }
