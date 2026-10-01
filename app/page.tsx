@@ -12,6 +12,8 @@ import { Galleries } from '@/components/museum/galleries';
 import { Header } from '@/components/museum/header';
 import { Hero, Manifesto } from '@/components/museum/hero';
 import { Marquee } from '@/components/museum/marquee';
+import { OnThisDay } from '@/components/museum/on-this-day';
+import { Directory } from '@/components/museum/directory';
 import { Preloader } from '@/components/museum/preloader';
 import { Pulse } from '@/components/museum/pulse';
 import { SectionNav } from '@/components/museum/section-nav';
@@ -51,6 +53,7 @@ export default function Museum() {
       <main>
         <Hero onOpen={open} />
         <Marquee onOpen={openId} />
+        <OnThisDay onOpen={open} />
         <Manifesto />
         <Galleries onEnter={enterGallery} onOpen={open} />
         <Collection era={era} setEra={setEra} onOpen={open} />
@@ -59,6 +62,7 @@ export default function Museum() {
         <WorkshopTeaser />
         <Debate />
         <ReadingRoom />
+        <Directory />
         <Closing />
       </main>
       <Footer />

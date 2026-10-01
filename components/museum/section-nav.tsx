@@ -14,6 +14,7 @@ export const HOME_SECTIONS = [
   { id: 'workshop', label: 'Workshop' },
   { id: 'debate', label: 'Debate' },
   { id: 'guide', label: 'Reading room' },
+  { id: 'directory', label: 'Directory' },
 ];
 
 /** A quiet table of contents pinned to the right edge of the home page. */

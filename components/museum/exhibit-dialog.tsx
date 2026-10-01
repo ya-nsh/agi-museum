@@ -7,6 +7,10 @@ import { ArrowLeft, ArrowRight, ArrowUpRight, Check, Link2, Pause, Play, Shuffle
 import { useEffect, useRef, useState } from 'react';
 import { accession, eraOf, events, eras, formatDate, neighbours, related, statusNote, statusShort, type Event } from '@/lib/museum';
 import { specimensFor } from '@/data/workshop';
+import { pairsFor } from '@/data/pairs';
+import { passport } from '@/lib/passport';
+import { Credits } from './people/credits';
+import { PendantLink } from './pairs/diptych';
 import { Sigil } from './sigil';
 import { useMuseum } from './providers';
 
@@ -23,6 +27,7 @@ export function ExhibitDialog({ event, onClose, onNavigate }: { event: Event | n
   useEffect(() => { if (!open) return; lockScroll(true); return () => lockScroll(false); }, [open, lockScroll]);
   const close = () => { setTouring(false); onClose(); };
   useEffect(() => { scroller.current?.scrollTo({ top: 0 }); }, [event]);
+  useEffect(() => { if (event) passport.seeExhibit(event.id); }, [event]);
 
   const go = (target: Event | null, d: number, keepTour = false) => {
     if (!target) return;
@@ -108,7 +113,7 @@ export function ExhibitDialog({ event, onClose, onNavigate }: { event: Event | n
                         <p>{event.significance}</p>
                       </div>
                       <div className="dialog-grid">
-                        <div><h3 className="mono">PEOPLE & INSTITUTIONS</h3><p>{event.people}</p></div>
+                        <div><h3 className="mono">PEOPLE & INSTITUTIONS</h3><p><Credits event={event} /></p></div>
                         <div><h3 className="mono">EVIDENCE LABEL</h3><p><span className="status-chip">{event.status}</span><br /><small>{statusNote[event.status]}</small></p></div>
                       </div>
                       <a className="source-card" href={event.source} target="_blank" rel="noreferrer" data-cursor="Source">
@@ -117,6 +122,7 @@ export function ExhibitDialog({ event, onClose, onNavigate }: { event: Event | n
                         <span className="source-host mono">{new URL(event.source).hostname.replace('www.', '')}</span>
                         <ArrowUpRight className="source-arrow" size={22} />
                       </a>
+                      {pairsFor(event.id).map(p => <PendantLink key={p.id} pair={p} exhibitId={event.id} />)}
                       {specimensFor(event.id).map(h => (
                         <Link key={h.specimen.slug} className="source-card hands-card" href={`/exhibit/${event.id}#hands-on`} data-cursor="Try">
                           <span className="mono">HANDS-ON SPECIMEN</span>

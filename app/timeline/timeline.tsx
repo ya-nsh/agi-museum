@@ -13,6 +13,7 @@ import { RevealLines } from '@/components/museum/reveal';
 import { Sigil } from '@/components/museum/sigil';
 import { useMuseum } from '@/components/museum/providers';
 import { Odometer } from '@/components/museum/odometer';
+import { passport } from '@/lib/passport';
 
 export default function Timeline() {
   const { scrollTo } = useMuseum();
@@ -60,11 +61,14 @@ export default function Timeline() {
     const io = new IntersectionObserver(entries => {
       const hit = entries.find(en => en.isIntersecting);
       const e = hit && events.find(x => x.id === hit.target.id);
-      if (e) setReading(e);
+      // Reading an exhibit here counts as seeing it.
+      if (e) { setReading(e); passport.seeExhibit(e.id); }
     }, { rootMargin: '-45% 0px -54% 0px' });
     document.querySelectorAll('.tl-event').forEach(el => io.observe(el));
     return () => io.disconnect();
   }, []);
+
+  useEffect(() => { passport.mark('timeline'); }, []);
 
   const jump = (e: Event) => {
     const el = document.getElementById(e.id);

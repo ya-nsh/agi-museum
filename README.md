@@ -13,6 +13,12 @@ An interactive, source-backed museum of the path toward artificial general intel
 - **The great debate** as an interpretive map of six perspectives by pace and where power sits.
 - **Where do you stand?** at `/stand`: eight statements place the visitor on the same debate map, with the path their answers traced, closeness to each perspective, a shareable `#r=…` link and a downloadable result card. Answers never leave the browser.
 - **The workshop** at `/workshop`: six hands-on specimens that run in the browser. Wire a McCulloch–Pitts neuron, train a perceptron (and watch it fail on XOR), talk to a reconstruction of ELIZA with its rules exposed, sit in the Chinese Room, watch backpropagation learn, and teach a reward model your taste until over-optimization turns into reward hacking. Each specimen also appears on its exhibit page and says what it simplifies.
+- **The time machine** at `/time-machine`: pick any month from 1943 to September 2026 and see only what had happened, the largest training run on record, which debate perspectives had appeared, the newest prediction and how many exhibits were still in the future. Shareable as `#YYYY-MM`.
+- **Who’s who** at `/people`, with a page for every person and institution: lifelines of recurring names across the collection, an A–Z index, and who was credited alongside whom. Credits on every exhibit link here.
+- **Pendants** at `/pairs`: exhibits from different decades hung side by side, with what changed and what did not. Each pair also hangs on both exhibit pages.
+- **The gift shop** at `/shop`: free 2400 × 3200 accession posters for any exhibit, postcards for each gallery and a printable one-page pocket timeline at `/shop/handout`.
+- **The visitor passport** at `/passport`: stamps for galleries and wings, kept in the browser, with a header badge, toasts when a stamp is earned and a downloadable ticket stub.
+- **On this day:** a home page placard for anniversaries in the collection, or the next one, with a strip of the month's dated exhibits.
 - **The reading room:** evidence labels, glossary and curators’ note.
 - **`/timeline`:** the complete chronology on a paper-toned reading layout with a scroll-drawn spine, chapter progress and thread highlighting.
 - **⌘K / Ctrl+K or `/`** searches the entire collection from any page.
