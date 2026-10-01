@@ -5,6 +5,7 @@ import { ArrowDownRight, ArrowUpRight } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { tracks } from '@/data/events';
 import { eraEvents, eras, inWords, spanYears, type Event } from '@/lib/museum';
+import { Art } from './art';
 import { Eyebrow, RevealLines } from './reveal';
 import { useMuseum } from './providers';
 
@@ -80,8 +81,8 @@ function GalleryPanel({ i, x, pinned, onEnter, onOpen }: { i: number; x: MotionV
   return (
     <motion.article className={`gallery-panel g-${i + 1}`} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.9 }}>
       <motion.span className="panel-numeral serif" style={pinned ? { x: shift } : undefined} aria-hidden="true">{era.numeral}</motion.span>
-      {i === 0 && <img className="panel-art" src="/alan-turing.jpg" alt="" width={675} height={919} />}
-      {i === eras.length - 1 && <img className="panel-art wide" src="/intelligence-gallery.png" alt="" width={1536} height={1024} />}
+      {i === 0 && <Art name="turing" className="panel-art" alt="" sizes="(min-width: 960px) 330px, 46vw" />}
+      {i === eras.length - 1 && <Art name="gallery" className="panel-art wide" alt="" sizes="(min-width: 960px) 576px, 80vw" />}
       <div className="panel-head">
         <span className="mono">GALLERY {era.numeral} · {era.label}</span>
         <h3 className="serif">{era.title}</h3>

@@ -11,10 +11,10 @@ import { pairsFor } from '@/data/pairs';
 import { passport } from '@/lib/passport';
 import { Credits } from './people/credits';
 import { PendantLink } from './pairs/diptych';
+import { Art, TURING_CREDIT } from './art';
 import { Sigil } from './sigil';
 import { useMuseum } from './providers';
 
-export const TURING_CREDIT = 'https://commons.wikimedia.org/wiki/File:Alan_Turing_Aged_16.jpg';
 
 export function ExhibitDialog({ event, onClose, onNavigate }: { event: Event | null; onClose: () => void; onNavigate: (e: Event) => void }) {
   const { lockScroll, toast } = useMuseum();
@@ -86,7 +86,7 @@ export function ExhibitDialog({ event, onClose, onNavigate }: { event: Event | n
                   <motion.aside key={event.id + '-plate'} className="plate" custom={dir}
                     variants={{ enter: (d: number) => ({ opacity: 0, x: d * 40 }), center: { opacity: 1, x: 0 }, exit: (d: number) => ({ opacity: 0, x: d * -40 }) }}
                     initial="enter" animate="center" exit="exit" transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
-                    {event.id === 'exhibit-01' && <img className="plate-photo" src="/alan-turing.jpg" alt="Alan Turing as a student, circa 1928–1929" width={675} height={919} />}
+                    {event.id === 'exhibit-01' && <Art name="turing" className="plate-photo" alt="Alan Turing as a student, circa 1928–1929" sizes="(min-width: 900px) 40vw, 100vw" />}
                     <div className="plate-top mono"><span>NO. {accession(event)}</span><span>GALLERY {eras[eraOf(event)].numeral}</span></div>
                     <Sigil event={event} draw className="plate-sigil" />
                     <div className="plate-year serif">{event.year}</div>

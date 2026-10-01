@@ -1,25 +1,16 @@
-'use client';
-
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowUpRight } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { collaborators, entityBySlug } from '@/data/people';
-import { Header } from '@/components/museum/header';
-import { CommandPalette } from '@/components/museum/command-palette';
+import { PassportVisit, SiteChrome } from '@/components/museum/site-chrome';
 import { Footer } from '@/components/museum/closing';
-import { ExhibitCard } from '@/components/museum/collection';
+import { ExhibitCardLink } from '@/components/museum/collection';
 import { RevealLines } from '@/components/museum/reveal';
 import { Lifelines } from '@/components/museum/people/lifelines';
-import { passport } from '@/lib/passport';
-import { eras, eraOf, type Event } from '@/lib/museum';
+import { eras, eraOf } from '@/lib/museum';
 
+/** A person's or institution's page. A server component; only the chrome, lifelines and cards hydrate. */
 export default function PersonView({ slug }: { slug: string }) {
   const ent = entityBySlug(slug)!;
-  const router = useRouter();
-  const [palette, setPalette] = useState(false);
-  useEffect(() => { passport.mark('people'); }, []);
-  const go = (e: Event) => router.push(`/exhibit/${e.id}`);
   const others = collaborators(ent);
   const first = ent.exhibits[0], last = ent.exhibits[ent.exhibits.length - 1];
   const galleries = [...new Set(ent.exhibits.map(e => eras[eraOf(e)].numeral))];
@@ -28,7 +19,8 @@ export default function PersonView({ slug }: { slug: string }) {
 
   return (
     <>
-      <Header onSearch={() => setPalette(true)} />
+      <PassportVisit mark="people" />
+      <SiteChrome />
       <main className="person">
         <section className="pr-hero shell">
           <nav className="xp-crumbs mono" aria-label="Breadcrumb">
@@ -48,7 +40,7 @@ export default function PersonView({ slug }: { slug: string }) {
         <section className="pr-exhibits shell" aria-labelledby="pr-ex-title">
           <p id="pr-ex-title" className="mono pr-label">{n === 1 ? 'THE EXHIBIT' : `THE ${n} EXHIBITS, OLDEST FIRST`}</p>
           <ul className="exhibits grid">
-            {ent.exhibits.map(e => <li key={e.id}><ExhibitCard e={e} onOpen={go} /></li>)}
+            {ent.exhibits.map(e => <li key={e.id}><ExhibitCardLink e={e} /></li>)}
           </ul>
         </section>
 
@@ -74,7 +66,6 @@ export default function PersonView({ slug }: { slug: string }) {
         </nav>
       </main>
       <Footer />
-      <CommandPalette open={palette} onOpenChange={setPalette} onSelect={go} />
     </>
   );
 }

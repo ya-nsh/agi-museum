@@ -1,76 +1,58 @@
-'use client';
-
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { motion } from 'motion/react';
-import { ArrowLeft, ArrowRight, ArrowUpRight, Check, Link2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { accession, eraOf, eras, events, formatDate, neighbours, related, statusNote, statusShort, type Event } from '@/lib/museum';
-import { Header } from '@/components/museum/header';
-import { CommandPalette } from '@/components/museum/command-palette';
+import { ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react';
+import { accession, eraOf, eras, events, formatDate, neighbours, related, statusNote, statusShort } from '@/lib/museum';
+import { ArrowNav, CopyLink, PassportVisit, SiteChrome } from '@/components/museum/site-chrome';
 import { Footer } from '@/components/museum/closing';
-import { ExhibitCard } from '@/components/museum/collection';
-import { TURING_CREDIT } from '@/components/museum/exhibit-dialog';
+import { ExhibitCardLink } from '@/components/museum/collection';
+import { Art, TURING_CREDIT } from '@/components/museum/art';
 import { Reveal, RevealLines } from '@/components/museum/reveal';
 import { Sigil } from '@/components/museum/sigil';
 import { SpecimenPanel } from '@/components/museum/workshop/specimen';
 import { specimensFor } from '@/data/workshop';
 import { pairs, pairsFor } from '@/data/pairs';
-import { passport } from '@/lib/passport';
 import { Credits } from '@/components/museum/people/credits';
 import { Diptych } from '@/components/museum/pairs/diptych';
 
+/**
+ * An exhibit's own page. A server component: the copy is rendered once into the
+ * static HTML, and only the interactive pieces (header, search, passport, copy
+ * button, specimens, cards) hydrate.
+ */
 export default function ExhibitView({ id }: { id: string }) {
   const e = events.find(x => x.id === id)!;
-  const router = useRouter();
-  const [palette, setPalette] = useState(false);
-  const [copied, setCopied] = useState(false);
   const { prev, next, index } = neighbours(e);
   const era = eras[eraOf(e)];
-  const go = (x: Event) => router.push(`/exhibit/${x.id}`);
   const hands = specimensFor(e.id);
   const pendants = pairsFor(e.id);
-  useEffect(() => { passport.seeExhibit(e.id); }, [e.id]);
-
-  useEffect(() => {
-    const onKey = (k: KeyboardEvent) => {
-      if ((k.target as HTMLElement)?.closest?.('input,textarea,[role=dialog]')) return;
-      if (k.key === 'ArrowLeft' && prev) go(prev);
-      if (k.key === 'ArrowRight' && next) go(next);
-    };
-    addEventListener('keydown', onKey);
-    return () => removeEventListener('keydown', onKey);
-  });
-
-  const copy = async () => {
-    try { await navigator.clipboard.writeText(location.href); setCopied(true); setTimeout(() => setCopied(false), 1800); } catch { /* clipboard unavailable */ }
-  };
+  const enter = (d: number, y?: string) => ({ '--d': `${d}s`, ...(y ? { '--enter-y': y } : {}) }) as React.CSSProperties;
 
   return (
     <>
-      <Header onSearch={() => setPalette(true)} />
+      <PassportVisit exhibit={e.id} />
+      <ArrowNav prev={prev ? `/exhibit/${prev.id}` : undefined} next={next ? `/exhibit/${next.id}` : undefined} />
+      <SiteChrome />
       <main className={`xp t-${e.track.toLowerCase()}`}>
         <section className="xp-hero shell">
           <nav className="xp-crumbs mono" aria-label="Breadcrumb">
             <Link href="/">MUSEUM</Link><span>/</span><Link href={`/#galleries`}>GALLERY {era.numeral}</Link><span>/</span><span aria-current="page">NO. {accession(e)}</span>
           </nav>
           <div className="xp-grid">
-            <motion.div className="xp-plate" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}>
-              {e.id === 'exhibit-01' && <img className="plate-photo" src="/alan-turing.jpg" alt="Alan Turing as a student, circa 1928–1929" width={675} height={919} />}
+            <div className="xp-plate enter-scale">
+              {e.id === 'exhibit-01' && <Art name="turing" className="plate-photo" priority alt="Alan Turing as a student, circa 1928–1929" sizes="(min-width: 900px) 40vw, 100vw" />}
               <div className="plate-top mono"><span>NO. {accession(e)}</span><span>{String(index + 1).padStart(2, '0')} OF {events.length}</span></div>
               <Sigil event={e} draw className="xp-sigil" />
               <div className="xp-year serif">{e.year}</div>
-            </motion.div>
+            </div>
             <div className="xp-copy">
-              <motion.p className="mono xp-date" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+              <p className="mono xp-date enter" style={enter(0.2, '0px')}>
                 <i className="dot" />{formatDate(e.date).toUpperCase()} · {e.track.toUpperCase()}
-              </motion.p>
+              </p>
               <RevealLines as="h1" className="xp-title serif" play delay={0.2} lines={[<span key="t">{e.title}</span>]} />
-              <motion.p className="xp-summary" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.9 }}>{e.summary}</motion.p>
-              <motion.div className="xp-actions" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65, duration: 0.9 }}>
+              <p className="xp-summary">{e.summary}</p>
+              <div className="xp-actions enter" style={enter(0.55, '20px')}>
                 <a className="btn btn-primary" href={e.source} target="_blank" rel="noreferrer"><span>Read the source</span><ArrowUpRight size={16} /></a>
-                <button className="btn btn-ghost" onClick={copy}><span>{copied ? 'Link copied' : 'Copy link'}</span>{copied ? <Check size={16} /> : <Link2 size={16} />}</button>
-              </motion.div>
+                <CopyLink />
+              </div>
             </div>
           </div>
         </section>
@@ -106,7 +88,7 @@ export default function ExhibitView({ id }: { id: string }) {
         <section className="xp-related shell" aria-labelledby="related-title">
           <p className="mono" id="related-title">ALSO ON THE {e.track.toUpperCase()} THREAD</p>
           <ul className="exhibits grid">
-            {related(e).map(r => <li key={r.id}><ExhibitCard e={r} onOpen={go} /></li>)}
+            {related(e).map(r => <li key={r.id}><ExhibitCardLink e={r} /></li>)}
           </ul>
         </section>
 
@@ -116,7 +98,6 @@ export default function ExhibitView({ id }: { id: string }) {
         </nav>
       </main>
       <Footer />
-      <CommandPalette open={palette} onOpenChange={setPalette} onSelect={go} />
     </>
   );
 }
