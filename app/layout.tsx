@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
+import { Analytics } from '@vercel/analytics/next';
 import { IBM_Plex_Mono, Schibsted_Grotesk } from 'next/font/google';
 import { Providers } from '@/components/museum/providers';
 import { Cursor } from '@/components/museum/cursor';
@@ -83,6 +84,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <Cursor />
         </Providers>
         <div className="grain" aria-hidden="true" />
+        {/* Vercel Web Analytics: cookieless page views, including in-app navigations. */}
+        <Analytics />
       </body>
     </html>
   );
