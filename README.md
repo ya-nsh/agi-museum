@@ -43,9 +43,17 @@ npm run dev
 npm run build
 ```
 
-This is a **Next.js 16 App Router** application with React 19 and TypeScript. Motion powers the animations, Lenis the smooth scrolling, Radix the accessible dialogs, and Lucide the icons. Type is set in Newsreader (display), Schibsted Grotesk (text) and IBM Plex Mono (labels). The native Next.js build produces a static export in `out/`. Deploy that directory to a static host, or import the repository into a Next.js-compatible host. No API keys or runtime backend are required.
+This is a **Next.js 16 App Router** application with React 19 and TypeScript. Motion powers the animations, Lenis the smooth scrolling, Radix the accessible dialogs, and Lucide the icons. Type is set in Newsreader (display, self-hosted from `app/fonts/` under the SIL Open Font License), Schibsted Grotesk (text) and IBM Plex Mono (labels). `next build --webpack` produces a static export in `out/` (webpack, because Turbopack's output is larger for this app). Deploy that directory to a static host, or import the repository into a Next.js-compatible host. No API keys or runtime backend are required.
 
-Some infrastructure files from the Sites starter are retained for compatibility; the application build uses native `next build --webpack`, not Vinext. `npm start` serves the built static export locally on port 3000 (or the `PORT` environment variable).
+`npm start` serves the built export locally on port 3000 (or the `PORT` environment variable) the way a static host would, with gzip and long-lived caching for hashed assets, so it is fine for performance checks.
+
+### Performance notes
+
+- Nothing visible waits for JavaScript. The intro curtain (`.preloader`) and above-the-fold entrances (`.enter`, `RevealLines play`) are CSS animations that start at first paint; an inline head script decides whether the intro plays. Each page's lead paragraph is painted as-is, because it is the largest contentful paint.
+- Exhibit, person and pocket-timeline pages are server components with small client islands (`components/museum/site-chrome.tsx`).
+- The search dialog and the home page's exhibit dialog are separate chunks, warmed when the browser is idle.
+- Images are pre-encoded at two widths as AVIF/WebP and served through `<Art>` (`components/museum/art.tsx`) with `srcset`; only the image that leads a page is fetched eagerly.
+- Smooth scrolling only runs `requestAnimationFrame` while a glide is in progress, so idle pages stay idle.
 
 ## Content and editorial policy
 
@@ -66,7 +74,13 @@ Source repository: https://github.com/ya-nsh/agi-museum
 
 ## Generated artwork
 
-`public/intelligence-gallery.png` was created using built-in ImageGen as conceptual contemporary museum artwork, not an archival photograph. It appears on the homepage expansion banner and the `/timeline` hero.
+`public/intelligence-gallery.png` was created using built-in ImageGen as conceptual contemporary museum artwork, not an archival photograph. It appears on the homepage expansion banner and the `/timeline` hero, served as `intelligence-gallery-{768,1536}.{avif,webp}`; `public/og.jpg` is a 1200 × 630 crop used for link previews. The originals stay in `public/` for credit and old links. To re-encode after replacing an original:
+
+```sh
+sips -s format png --resampleWidth 1536 public/intelligence-gallery.png --out /tmp/g.png
+cwebp -q 72 -m 6 /tmp/g.png -o public/intelligence-gallery-1536.webp
+avifenc -q 55 -s 4 /tmp/g.png public/intelligence-gallery-1536.avif
+```
 
 Prompt: A luminous pale chartreuse filament crossing a dark architectural gallery, transitioning from tactile ivory punched paper and glass vacuum tubes on the left into an elegant suspended crystalline neural sculpture on the right. Premium contemporary museum installation photograph, cinematic still life; landscape 1536×1024; charcoal black #131411, restrained chartreuse #d5f68b, ivory and silver; dramatic volumetric light; no text, logos, UI or watermark.
 

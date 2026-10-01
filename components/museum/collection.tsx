@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'motion/react';
 import { ArrowDownWideNarrow, ArrowUpRight, ArrowUpWideNarrow, LayoutGrid, List, Search, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -7,6 +8,7 @@ import { statuses, tracks, type Track } from '@/data/events';
 import { specimensFor } from '@/data/workshop';
 import { usePassport } from '@/lib/passport';
 import { accession, eraOf, eras, events, formatDate, statusShort, type Event } from '@/lib/museum';
+import { Art } from './art';
 import { Sigil } from './sigil';
 import { Eyebrow, RevealLines } from './reveal';
 
@@ -89,16 +91,19 @@ export function Collection({ era, setEra, onOpen }: { era: number | null; setEra
       </p>
 
       {shown.length ? (
-        <motion.ul className={`exhibits ${view}`} layout>
-          <AnimatePresence mode="popLayout">
+        <ul className={`exhibits ${view}`}>
+          {/* initial={false}: cards are in the server HTML and stay visible on hydration;
+              only filtering, sorting and "show more" animate. Position-only layout
+              animation never scales (and so never re-rasterizes) a card. */}
+          <AnimatePresence mode="popLayout" initial={false}>
             {shown.map((e, i) => (
-              <motion.li key={e.id} layout initial={{ opacity: 0, y: 30, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+              <motion.li key={e.id} layout="position" initial={{ opacity: 0, y: 30, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
                 transition={{ duration: 0.6, delay: Math.min(i % PAGE, 11) * 0.035, ease: [0.22, 1, 0.36, 1] }}>
                 {view === 'grid' ? <ExhibitCard e={e} onOpen={onOpen} /> : <ExhibitRow e={e} onOpen={onOpen} />}
               </motion.li>
             ))}
           </AnimatePresence>
-        </motion.ul>
+        </ul>
       ) : (
         <motion.div className="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <p className="serif">Nothing in the archive matches.</p>
@@ -138,7 +143,7 @@ export function ExhibitCard({ e, onOpen }: { e: Event; onOpen: (e: Event) => voi
   return (
     <button className={`card t-${e.track.toLowerCase()} ${e.id === 'exhibit-01' ? 'has-photo' : ''}`} onClick={() => onOpen(e)} onPointerMove={move} onPointerLeave={leave} data-cursor="View">
       <span className="card-glow" aria-hidden="true" />
-      {e.id === 'exhibit-01' && <img className="card-photo" src="/alan-turing.jpg" alt="" width={675} height={919} loading="lazy" />}
+      {e.id === 'exhibit-01' && <Art name="turing" className="card-photo" alt="" sizes="(min-width: 700px) 420px, 100vw" />}
       <span className="card-top mono"><span>NO. {accession(e)}{seen && <b className="card-seen" title="In your passport"> · SEEN</b>}</span><span>{statusShort[e.status].toUpperCase()}</span></span>
       <span className="card-art">
         <span className="card-year serif">{e.year}</span>
@@ -152,6 +157,12 @@ export function ExhibitCard({ e, onOpen }: { e: Event; onOpen: (e: Event) => voi
       <span className="card-foot mono"><span>GALLERY {eras[eraOf(e)].numeral}{specimensFor(e.id).length > 0 && <b className="card-hands"> · HANDS-ON</b>}</span><span className="card-open">EXPLORE <ArrowUpRight size={14} /></span></span>
     </button>
   );
+}
+
+/** An exhibit card that opens the exhibit's own page (for server-rendered lists). */
+export function ExhibitCardLink({ e }: { e: Event }) {
+  const router = useRouter();
+  return <ExhibitCard e={e} onOpen={() => router.push(`/exhibit/${e.id}`)} />;
 }
 
 function ExhibitRow({ e, onOpen }: { e: Event; onOpen: (e: Event) => void }) {

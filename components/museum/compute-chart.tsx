@@ -49,35 +49,35 @@ export function ComputeChart() {
           <Eyebrow index="04">THE COMPUTE CLIMB</Eyebrow>
           <RevealLines id="compute-title" className="section-title serif" lines={[<span key="a">Twenty-five orders</span>, <span key="b">of <em>magnitude.</em></span>]} />
         </div>
-        <p className="section-lede">Each dot is a notable AI model, placed by the arithmetic spent training it. The vertical axis is logarithmic: every gridline is ten thousand times the one below. Hover the highlighted models for details.</p>
+        <p className="section-lede">Each dot is a notable AI model, placed by the arithmetic spent training it. The vertical axis is logarithmic: every gridline is ten thousand times the one below. Hover or tab to the highlighted models for details.</p>
       </div>
 
       <div className="compute-layout">
         <div className="chart-frame" ref={ref}>
           <div className="chart-scroll" data-lenis-prevent>
-            <svg viewBox={`0 0 ${W} ${H}`} className={`chart ${seen ? 'on' : ''}`} role="img" aria-labelledby="compute-desc">
+            <svg viewBox={`0 0 ${W} ${H}`} className={`chart ${seen ? 'on' : ''}`} role="group" aria-label="Training compute of notable AI models, 1950 to 2026" aria-describedby="compute-desc">
               <desc id="compute-desc">Scatter plot of training compute for {computePoints.length} notable AI models from 1950 to 2026 on a logarithmic scale, rising from about 40 operations to about 10 to the 27th. Growth accelerates sharply after 2010.</desc>
               {Array.from({ length: Y1 / 4 + 1 }, (_, i) => i * 4).map(y => (
-                <g key={y} className="grid">
+                <g key={y} className="grid" aria-hidden="true">
                   <line x1={M.l} x2={W - M.r} y1={sy(y)} y2={sy(y)} />
                   <text x={M.l - 12} y={sy(y) + 4} textAnchor="end">10{sup(y)}</text>
                 </g>
               ))}
               {[1950, 1960, 1970, 1980, 1990, 2000, 2010, 2014, 2018, 2022, 2026].map(x => (
-                <text key={x} className="axis-x" x={sx(x)} y={H - M.b + 26} textAnchor="middle">{x}</text>
+                <text key={x} aria-hidden="true" className="axis-x" x={sx(x)} y={H - M.b + 26} textAnchor="middle">{x}</text>
               ))}
-              <text className="axis-label" x={M.l} y={M.t - 10}>TRAINING COMPUTE (FLOP)</text>
-              <rect className="era-band" x={sx(2010)} y={M.t} width={sx(2028) - sx(2010)} height={H - M.t - M.b} />
-              <text className="axis-label" x={sx(2010) + 10} y={H - M.b - 12}>DEEP LEARNING ERA</text>
-              <g className="scale-break"><line x1={sx(BREAK)} x2={sx(BREAK)} y1={M.t} y2={H - M.b} /><text x={sx(BREAK) + 10} y={M.t + 14}>TIME SCALE WIDENS ×{(((1 - SPLIT) / (X1 - BREAK)) / (SPLIT / (BREAK - X0))).toFixed(1)}</text></g>
+              <text aria-hidden="true" className="axis-label" x={M.l} y={M.t - 10}>TRAINING COMPUTE (FLOP)</text>
+              <rect aria-hidden="true" className="era-band" x={sx(2010)} y={M.t} width={sx(2028) - sx(2010)} height={H - M.t - M.b} />
+              <text aria-hidden="true" className="axis-label" x={sx(2010) + 10} y={H - M.b - 12}>DEEP LEARNING ERA</text>
+              <g className="scale-break" aria-hidden="true"><line x1={sx(BREAK)} x2={sx(BREAK)} y1={M.t} y2={H - M.b} /><text x={sx(BREAK) + 10} y={M.t + 14}>TIME SCALE WIDENS ×{(((1 - SPLIT) / (X1 - BREAK)) / (SPLIT / (BREAK - X0))).toFixed(1)}</text></g>
 
-              <g className="points">
+              <g className="points" aria-hidden="true">
                 {computePoints.map(([x, y], i) => (
                   <circle key={i} cx={sx(x)} cy={sy(y)} r={2.2} style={{ animationDelay: `${((sx(x) - M.l) / (W - M.l - M.r)) * 1.6}s` }} />
                 ))}
               </g>
-              <motion.path className="trend early" d={line(early)} initial={{ pathLength: 0 }} animate={seen ? { pathLength: 1 } : undefined} transition={{ duration: 1.4, delay: 0.6, ease: 'easeInOut' }} />
-              <motion.path className="trend modern" d={line(modern)} initial={{ pathLength: 0 }} animate={seen ? { pathLength: 1 } : undefined} transition={{ duration: 1, delay: 1.9, ease: 'easeOut' }} />
+              <motion.path aria-hidden="true" className="trend early" d={line(early)} initial={{ pathLength: 0 }} animate={seen ? { pathLength: 1 } : undefined} transition={{ duration: 1.4, delay: 0.6, ease: 'easeInOut' }} />
+              <motion.path aria-hidden="true" className="trend modern" d={line(modern)} initial={{ pathLength: 0 }} animate={seen ? { pathLength: 1 } : undefined} transition={{ duration: 1, delay: 1.9, ease: 'easeOut' }} />
 
               {computeLandmarks.map(l => {
                 const x = sx(l.year), y = sy(Math.log10(l.flop));
@@ -86,7 +86,9 @@ export function ComputeChart() {
                 const ty = pos === 'above' ? y - 14 : pos === 'below' ? y + 22 : y + 4;
                 return (
                   <motion.g key={l.name} className={`landmark ${hover === l ? 'on' : ''}`} initial={{ opacity: 0 }} animate={seen ? { opacity: 1 } : undefined} transition={{ delay: 0.4 + ((sx(l.year) - M.l) / (W - M.l - M.r)) * 1.8 }}
-                    onPointerEnter={() => setHover(l)} onPointerLeave={() => setHover(null)}>
+                    onPointerEnter={() => setHover(l)} onPointerLeave={() => setHover(null)}
+                    tabIndex={0} role="img" aria-label={`${l.name}, ${l.org}, ${Math.floor(l.year)}: about ${sci(l.flop)} FLOP of training compute (${l.confidence})`}
+                    onFocus={() => setHover(l)} onBlur={() => setHover(h => (h === l ? null : h))}>
                     <circle className="hit" cx={x} cy={y} r={16} />
                     <circle className="ring" cx={x} cy={y} r={7} />
                     <circle className="core" cx={x} cy={y} r={3.4} />
@@ -98,7 +100,7 @@ export function ComputeChart() {
                 const x = sx(hover.year), y = sy(Math.log10(hover.flop));
                 const left = x > W * 0.62, bw = 230;
                 return (
-                  <g className="tooltip" transform={`translate(${left ? x - bw - 18 : x + 18} ${Math.max(M.t, y - 70)})`} pointerEvents="none">
+                  <g className="tooltip" aria-hidden="true" transform={`translate(${left ? x - bw - 18 : x + 18} ${Math.max(M.t, y - 70)})`} pointerEvents="none">
                     <rect width={bw} height={78} rx={2} />
                     <text x={14} y={24} className="tt-name">{hover.name}</text>
                     <text x={14} y={44}>{hover.org} · {Math.floor(hover.year)}</text>

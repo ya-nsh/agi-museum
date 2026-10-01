@@ -1,23 +1,15 @@
-'use client';
-
 import Link from 'next/link';
-import { ArrowLeft, Printer } from 'lucide-react';
-import { useEffect } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { eraEvents, eras, events, formatDate, lastYear, sourceCount, statusShort } from '@/lib/museum';
-import { passport } from '@/lib/passport';
+import { PrintButton } from './print-button';
 
 /** A single printable sheet: every exhibit, grouped by gallery. Designed for paper first. */
 export default function Handout() {
-  useEffect(() => {
-    const onPrint = () => passport.mark('shop');
-    addEventListener('beforeprint', onPrint);
-    return () => removeEventListener('beforeprint', onPrint);
-  }, []);
   return (
     <div className="handout-page">
       <div className="handout-bar">
         <Link href="/shop" className="icon-btn"><ArrowLeft size={15} />Back to the shop</Link>
-        <button className="icon-btn active" onClick={() => print()}><Printer size={15} />Print or save as PDF</button>
+        <PrintButton />
       </div>
       <article className="handout">
         <header className="ho-head">

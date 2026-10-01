@@ -45,8 +45,8 @@ function NavLink({ href, ...rest }: React.AnchorHTMLAttributes<HTMLAnchorElement
 export function Wordmark() {
   return (
     <span className="wordmark">
-      <span className="wm-glyph serif">a<em>i</em></span>
-      <span className="wm-text mono">AGI<br />MUSEUM</span>
+      <span className="wm-glyph serif" aria-hidden="true">a<em>i</em></span>
+      <span className="wm-text mono">AGI <br />MUSEUM</span>
     </span>
   );
 }
@@ -77,7 +77,7 @@ export function Header({ onSearch, current }: { onSearch: () => void; current?: 
   return (
     <>
       <motion.header className={`site-header ${solid ? 'is-solid' : ''}`} animate={{ y: hidden && !menu ? '-110%' : '0%' }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}>
-        <Link href="/" className="brand" aria-label="AGI Museum home"><Wordmark /></Link>
+        <Link href="/" className="brand"><Wordmark /><span className="sr-only"> home</span></Link>
         <nav className="main-nav" aria-label="Main navigation">
           {LINKS.map(l => (
             <NavLink key={l.href} href={href(l.href)} className={isCurrent(l) ? 'current' : ''} aria-current={current === l.label ? 'page' : isCurrent(l) ? 'location' : undefined}>

@@ -1,5 +1,6 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useState } from 'react';
 import { events, type Event } from '@/lib/museum';
 import { Closing, Footer, ReadingRoom } from '@/components/museum/closing';
@@ -7,7 +8,6 @@ import { Collection } from '@/components/museum/collection';
 import { CommandPalette } from '@/components/museum/command-palette';
 import { ComputeChart } from '@/components/museum/compute-chart';
 import { Debate } from '@/components/museum/debate';
-import { ExhibitDialog } from '@/components/museum/exhibit-dialog';
 import { Galleries } from '@/components/museum/galleries';
 import { Header } from '@/components/museum/header';
 import { Hero, Manifesto } from '@/components/museum/hero';
@@ -20,6 +20,11 @@ import { SectionNav } from '@/components/museum/section-nav';
 import { WorkshopTeaser } from '@/components/museum/workshop/teaser';
 import { useMuseum } from '@/components/museum/providers';
 
+// The exhibit dialog (and Radix with it) is its own chunk: nothing on first
+// paint needs it. It is fetched once the page is idle, or on first open.
+const loadDialog = () => import('@/components/museum/exhibit-dialog');
+const ExhibitDialog = dynamic(() => loadDialog().then(m => m.ExhibitDialog), { ssr: false });
+
 export default function Museum() {
   const { scrollTo } = useMuseum();
   const [selected, setSelected] = useState<Event | null>(null);
@@ -31,7 +36,10 @@ export default function Museum() {
     const sync = () => setSelected(events.find(e => `#${e.id}` === location.hash) ?? null);
     sync();
     addEventListener('hashchange', sync);
-    return () => removeEventListener('hashchange', sync);
+    const idle = window.requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 2000));
+    const cancelIdle = window.cancelIdleCallback ?? clearTimeout;
+    const id = idle(() => { void loadDialog(); });
+    return () => { removeEventListener('hashchange', sync); cancelIdle(id); };
   }, []);
 
   const open = useCallback((e: Event) => {

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { entities, entityBySlug } from '@/data/people';
+import { pageMetadata } from '@/lib/seo';
 import PersonView from './person-view';
 
 export const dynamicParams = false;
@@ -16,7 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!ent) return {};
   const n = ent.exhibits.length;
   const description = `${ent.name} appears in ${n} exhibit${n === 1 ? '' : 's'} at the AGI Museum: ${ent.exhibits.map(e => `${e.title} (${e.year})`).join('; ')}.`;
-  return { title: ent.name, description, alternates: { canonical: `/people/${ent.slug}` } };
+  return pageMetadata({ title: ent.name, description, path: `/people/${ent.slug}`, type: ent.kind === 'person' ? 'profile' : 'website' });
 }
 
 export default async function PersonPage({ params }: Props) {

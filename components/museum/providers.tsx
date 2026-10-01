@@ -12,8 +12,8 @@ type Ctx = {
   scrollTo: (target: string | HTMLElement | number, offset?: number) => void;
   /** Freeze page scrolling while an overlay is open. */
   lockScroll: (locked: boolean) => void;
+  /** False only while the home page's first-visit intro curtain is still down. */
   introDone: boolean;
-  finishIntro: () => void;
   /** Show a short confirmation message at the bottom of the screen. */
   toast: (message: string) => void;
 };
@@ -48,34 +48,62 @@ const subscribeReduced = (cb: () => void) => {
   m.addEventListener('change', cb);
   return () => m.removeEventListener('change', cb);
 };
-const noopSubscribe = () => () => {};
+
+// The intro curtain is pure CSS (see .preloader in globals.css), so it plays
+// from first paint whether or not the JavaScript has arrived. The head script
+// in app/layout.tsx sets data-intro="play" when it will run; this mirrors its
+// timing so the hero canvas, counters and smooth scrolling start as it lifts.
+const INTRO_LIFT_MS = 1000;
+const introLifted = () => document.documentElement.dataset.intro !== 'play' || performance.now() >= INTRO_LIFT_MS;
+const subscribeIntro = (cb: () => void) => {
+  const t = setTimeout(cb, Math.max(0, INTRO_LIFT_MS - performance.now()));
+  return () => clearTimeout(t);
+};
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const systemReduced = useSyncExternalStore(subscribeReduced, () => matchMedia(REDUCED_QUERY).matches, () => false);
   const userOff = useSyncExternalStore(motionStore.subscribe, motionStore.get, () => false);
-  // The inline head script marks repeat visits in this session, so the intro runs once.
-  const introSeen = useSyncExternalStore(noopSubscribe, () => document.documentElement.dataset.intro === 'seen', () => false);
-  const [introFinished, setIntroFinished] = useState(false);
+  const lifted = useSyncExternalStore(subscribeIntro, introLifted, () => false);
   const lenis = useRef<Lenis | null>(null);
+  const wakeLenis = useRef(() => {});
   const locks = useRef(0);
   const reduced = systemReduced || userOff;
-  const introDone = introFinished || introSeen || reduced;
+  const introDone = lifted || reduced;
 
   useEffect(() => {
     document.documentElement.dataset.motion = reduced ? 'reduced' : 'full';
     if (reduced) return;
-    const l = new Lenis({ autoRaf: true, lerp: 0.1, prevent: node => !!node.closest?.('[data-lenis-prevent]') });
+    // Lenis only needs frames while it is gliding. Its autoRaf would keep a
+    // requestAnimationFrame loop alive forever, so the page could never idle;
+    // instead the loop wakes on wheel input or a programmatic scroll and stops
+    // once the glide settles. Lenis gets its own clock that only advances while
+    // the loop runs, so a glide never starts with a huge time step.
+    const l = new Lenis({ autoRaf: false, lerp: 0.1, prevent: node => !!node.closest?.('[data-lenis-prevent]') });
+    let frame = 0, last = 0, clock = 0;
+    const tick = (t: number) => {
+      clock += last ? Math.min(t - last, 64) : 16;
+      last = t;
+      l.raf(clock);
+      frame = l.isScrolling === 'smooth' ? requestAnimationFrame(tick) : 0;
+      if (!frame) last = 0;
+    };
+    const wake = () => { if (!frame) frame = requestAnimationFrame(tick); };
+    const offVirtual = l.on('virtual-scroll', wake);
     lenis.current = l;
-    if (locks.current > 0) l.stop();
-    return () => { l.destroy(); lenis.current = null; };
+    wakeLenis.current = wake;
+    if (locks.current > 0 || !introLifted()) l.stop();
+    return () => { offVirtual(); cancelAnimationFrame(frame); l.destroy(); lenis.current = null; wakeLenis.current = () => {}; };
   }, [reduced]);
+
+  // Smooth scrolling stays parked while the intro curtain is down.
+  useEffect(() => { if (lifted && locks.current === 0) lenis.current?.start(); }, [lifted]);
 
   const toggleMotion = useCallback(() => motionStore.set(!motionStore.get()), []);
 
   const scrollTo = useCallback((target: string | HTMLElement | number, offset = -72) => {
     const el = typeof target === 'string' ? document.querySelector<HTMLElement>(target) : target;
     if (el === null) return;
-    if (lenis.current) { lenis.current.scrollTo(el, { offset, duration: 1.4, force: true }); return; }
+    if (lenis.current) { lenis.current.scrollTo(el, { offset, duration: 1.4, force: true }); wakeLenis.current(); return; }
     const y = typeof el === 'number' ? el : el.getBoundingClientRect().top + window.scrollY + offset;
     window.scrollTo({ top: y, behavior: 'instant' });
   }, []);
@@ -100,10 +128,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
     locks.current = Math.max(0, locks.current + (locked ? 1 : -1));
     const on = locks.current > 0;
     document.documentElement.classList.toggle('scroll-locked', on);
-    if (on) lenis.current?.stop(); else lenis.current?.start();
+    if (on) lenis.current?.stop(); else if (introLifted()) lenis.current?.start();
   }, []);
-
-  const finishIntro = useCallback(() => setIntroFinished(true), []);
 
   const [toasts, setToasts] = useState<{ id: number; message: string }[]>([]);
   const toastId = useRef(0);
@@ -113,7 +139,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 2400);
   }, []);
 
-  const value = useMemo(() => ({ reduced, toggleMotion, scrollTo, lockScroll, introDone, finishIntro, toast }), [reduced, toggleMotion, scrollTo, lockScroll, introDone, finishIntro, toast]);
+  const value = useMemo(() => ({ reduced, toggleMotion, scrollTo, lockScroll, introDone, toast }), [reduced, toggleMotion, scrollTo, lockScroll, introDone, toast]);
 
   return (
     <MuseumCtx.Provider value={value}>
